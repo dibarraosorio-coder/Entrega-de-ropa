@@ -120,6 +120,7 @@
         <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
     </div>
 
+    <!-- Asegúrate de que el archivo de imagen se llame exactamente logo.png en tu GitHub (todo minúsculas) -->
     <img src="logo.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
     <header>
@@ -356,7 +357,7 @@
                     }
                 })
                 .catch(error => {
-                    alert("Error al cargar la base de datos: " + error.message);
+                    alert("Error al cargar la base de datos. Verifica tu conexión o el estado del Google Sheet.\nDetalle: " + error.message);
                     loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
                 });
         });
@@ -707,3 +708,93 @@
                         if (valColJ !== undefined && valColJ.toString().trim() !== '') {
                             displayNames = [valColJ.toString().toUpperCase()];
                         }
+                        if (valColH !== undefined) {
+                            detalle = valColH.toString().toUpperCase();
+                        } else {
+                            detalle = '';
+                        }
+                    }
+
+                    let cleanSize = detalle ? detalle.toString().trim().toUpperCase() : "";
+
+                    displayNames.forEach(dName => {
+                        let itemName = dName.toUpperCase();
+                        let key = itemName + "|||" + cleanSize;
+                        
+                        if(!totals[key]) {
+                            totals[key] = { name: itemName, size: cleanSize, qty: 0 };
+                        }
+                        totals[key].qty += epp.qty;
+                    });
+                });
+            });
+
+            const sortedKeys = Object.keys(totals).sort((a, b) => {
+                if(totals[a].name === totals[b].name) return totals[a].size.localeCompare(totals[b].size);
+                return totals[a].name.localeCompare(totals[b].name);
+            });
+
+            const stVal = filterStatus.options[filterStatus.selectedIndex].text;
+            const pVal = filterParque.value || "Todos";
+            const aVal = filterArea.value || "Todas";
+            const cVal = filterCargo.value || "Todos";
+            const ccVal = filterCC.value || "Todos";
+
+            let printHTML = `
+                <div class="print-page">
+                    <div class="p-header">
+                        <img src="logo.png" class="p-logo">
+                        <div class="p-title" style="font-size: 15pt;">RESUMEN DE ROPA Y EPP<br><span style="font-size:10pt; font-weight:normal; color:#4b5563;">Listado Consolidado por Filtro</span></div>
+                    </div>
+                    <div class="p-header-line"></div>
+
+                    <div class="p-info-box" style="margin-bottom: 25px;">
+                        <div class="p-info-row"><div class="p-info-label">ESTADO MOSTRADO</div><div class="p-info-value">${stVal}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">PARQUE</div><div class="p-info-value">${pVal}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">ÁREA</div><div class="p-info-value">${aVal}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">CARGO</div><div class="p-info-value">${cVal}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">CENTRO COSTO</div><div class="p-info-value">${ccVal}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">TRABAJADORES</div><div class="p-info-value">${filteredWorkers.length}</div></div>
+                    </div>
+
+                    <table class="p-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60%; text-align: left;">ELEMENTO / ÍTEM</th>
+                                <th style="width: 20%; text-align: center;">TALLA</th>
+                                <th style="width: 20%; text-align: center;">CANTIDAD TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (sortedKeys.length === 0) {
+                printHTML += `<tr><td colspan="3" style="text-align:center; padding: 20px;">No hay ítems registrados en esta vista</td></tr>`;
+            } else {
+                sortedKeys.forEach(key => {
+                    const item = totals[key];
+                    printHTML += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td style="text-align:center;">${item.size || '-'}</td>
+                            <td style="text-align:center;">${item.qty}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            printHTML += `
+                        </tbody>
+                    </table>
+                    <div class="p-table-bottom-line" style="margin-top: 15px;"></div>
+                    <div class="p-decl-text" style="text-align: left;">Documento generado el ${new Date().toLocaleDateString('es-CL')} a las ${new Date().toLocaleTimeString('es-CL')}</div>
+                </div>
+            `;
+
+            printArea.innerHTML = printHTML;
+            setTimeout(() => { window.print(); }, 500);
+        });
+
+    </script>
+</body>
+</html>
