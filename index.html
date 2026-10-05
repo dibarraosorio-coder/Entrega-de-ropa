@@ -139,10 +139,16 @@
 
     <main class="w-full px-4 sm:px-8 mt-8 mb-12">
         <div id="dashboard" class="hidden">
-            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8 transition-all duration-300">
                 
-                <div class="glass-panel xl:col-span-3">
-                    <h2 class="text-lg font-bold mb-4 text-[var(--accent-gold)] uppercase tracking-wider">Filtros & Búsqueda</h2>
+                <div id="filterPanelWrapper" class="glass-panel xl:col-span-4 transition-all duration-300">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider">Filtros & Búsqueda</h2>
+                        <button onclick="toggleReportPanel()" class="glass-btn py-1 px-3 text-xs flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            Opciones y Reportes
+                        </button>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Buscar</label>
@@ -154,6 +160,9 @@
                                 <option value="">Todos los Estados</option>
                                 <option value="pendiente">Pendientes</option>
                                 <option value="entregado">Entregados</option>
+                                <option value="desvinculado">Desvinculados</option>
+                                <option value="licencia">Con Licencia</option>
+                                <option value="vacaciones">De Vacaciones</option>
                             </select>
                         </div>
                         <div>
@@ -175,25 +184,23 @@
                     </div>
                 </div>
 
-                <div class="glass-panel flex flex-col justify-center gap-4">
-                    <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider">Reporte Final y Opciones</h2>
+                <div id="reportPanel" class="glass-panel flex flex-col justify-center gap-4 hidden xl:col-span-1 transition-all duration-300">
+                    <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider text-center">Exportación</h2>
                     
                     <label class="flex items-center cursor-pointer mb-2 p-2 rounded bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                         <input type="checkbox" id="toggleCodigo" class="custom-checkbox">
-                        <span class="ml-3 text-sm font-bold text-[var(--text-main)]">Incluir CÓDIGO en PDF</span>
+                        <span class="ml-3 text-sm font-bold text-[var(--text-main)]">CÓDIGO en PDF</span>
                     </label>
 
                     <button id="btnExportExcel" class="glass-btn flex items-center justify-center gap-2 hover:text-green-500 hover:border-green-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Descargar Reporte Excel
+                        Descargar Excel
                     </button>
 
                     <button id="btnImprimirResumen" class="glass-btn flex items-center justify-center gap-2 hover:text-blue-500 hover:border-blue-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Imprimir Resumen Filtrado
+                        Resumen Filtrado PDF
                     </button>
-                    
-                    <button id="btnGeneratePDF" style="display:none;"></button>
                 </div>
             </div>
 
@@ -261,6 +268,21 @@
 
         const infoKeywordsExact = ['nombre', 'rut', 'cargo', 'centro costo', 'cc', 'parque', 'id', 'modelo botín', 'modelo botin', 'doble dotación', 'doble dotacion', 'area', 'área', 'entregado'];
 
+        // TOGGLE PARA OCULTAR O MOSTRAR LOS REPORTES
+        window.toggleReportPanel = function() {
+            const rp = document.getElementById('reportPanel');
+            const fp = document.getElementById('filterPanelWrapper');
+            if(rp.classList.contains('hidden')) {
+                rp.classList.remove('hidden');
+                fp.classList.remove('xl:col-span-4');
+                fp.classList.add('xl:col-span-3');
+            } else {
+                rp.classList.add('hidden');
+                fp.classList.remove('xl:col-span-3');
+                fp.classList.add('xl:col-span-4');
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             fetch(URL_GOOGLE_SCRIPT)
                 .then(response => {
@@ -322,13 +344,20 @@
                             if (!nameCol || !row[nameCol.index]) continue;
 
                             let currentNombre = row[nameCol.index];
-                            let isEntregado = entregadoColInfo && row[entregadoColInfo.index] === 'SI';
+                            
+                            // DETERMINAR ESTADO (Pendiente, Entregado, Desvinculado, Licencia, Vacaciones)
+                            let cellEstado = entregadoColInfo && row[entregadoColInfo.index] ? row[entregadoColInfo.index].toString().trim().toUpperCase() : '';
+                            let estadoFinal = 'pendiente';
+                            if (cellEstado === 'SI' || cellEstado === 'TRUE') estadoFinal = 'entregado';
+                            else if (cellEstado === 'DESVINCULADO') estadoFinal = 'desvinculado';
+                            else if (cellEstado === 'LICENCIA') estadoFinal = 'licencia';
+                            else if (cellEstado === 'VACACIONES') estadoFinal = 'vacaciones';
 
                             let worker = { 
                                 id: sheetName + '_' + i, 
                                 nombre: currentNombre,
                                 sheet: sheetName,
-                                entregado: isEntregado, 
+                                estado: estadoFinal, 
                                 info: {}, 
                                 epps: [],
                                 rawRow: row 
@@ -398,8 +427,7 @@
                     const rut = getField(w, 'rut').toLowerCase();
                     if (!nombre.includes(sVal) && !rut.includes(sVal)) return false;
                 }
-                if (stVal === 'entregado' && !w.entregado) return false;
-                if (stVal === 'pendiente' && w.entregado) return false;
+                if (stVal && w.estado !== stVal) return false;
                 if (pVal && getField(w, 'parque') !== pVal) return false;
                 if (aVal && getField(w, 'area', 'área') !== aVal) return false;
                 if (cVal && getField(w, 'cargo') !== cVal) return false;
@@ -437,8 +465,7 @@
                     const rut = getField(w, 'rut').toLowerCase();
                     if (!nombre.includes(sVal) && !rut.includes(sVal)) return false;
                 }
-                if (stVal === 'entregado' && !w.entregado) return false;
-                if (stVal === 'pendiente' && w.entregado) return false;
+                if (stVal && w.estado !== stVal) return false;
                 if (pVal && getField(w, 'parque') !== pVal) return false;
                 if (aVal && getField(w, 'area', 'área') !== aVal) return false;
                 if (cVal && getField(w, 'cargo') !== cVal) return false;
@@ -463,7 +490,8 @@
             let bodyHTML = '';
             filteredWorkers.forEach(w => {
                 let actionHTML = '';
-                if(w.entregado) {
+                
+                if(w.estado === 'entregado') {
                     actionHTML = `
                         <div class="flex items-center gap-2">
                             <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">✓ ENTREGADO</span>
@@ -471,8 +499,40 @@
                             <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-red-500 hover:border-red-500" title="Deshacer Entrega" style="color: #ef4444;">↩️</button>
                         </div>
                     `;
+                } else if (w.estado === 'desvinculado') {
+                    actionHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);">🚫 DESVINCULADO</span>
+                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
+                        </div>
+                    `;
+                } else if (w.estado === 'licencia') {
+                    actionHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">⚕️ LICENCIA</span>
+                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
+                        </div>
+                    `;
+                } else if (w.estado === 'vacaciones') {
+                    actionHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);">🏖️ VACACIONES</span>
+                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
+                        </div>
+                    `;
                 } else {
-                    actionHTML = `<button onclick="generarActaIndividual('${w.id}')" class="glass-btn-primary w-full text-center py-1.5 shadow-md">📄 Generar Acta</button>`;
+                    // Estado Pendiente
+                    actionHTML = `
+                        <div class="flex items-center gap-2">
+                            <button onclick="generarActaIndividual('${w.id}')" class="glass-btn-primary w-full text-center py-1.5 shadow-md">📄 Generar Acta</button>
+                            <select onchange="cambiarEstadoEspecial('${w.id}', this.value); this.value='';" class="glass-btn py-1 px-2 text-[0.8rem] w-auto cursor-pointer" title="Marcar estado especial">
+                                <option value="" disabled selected>📌</option>
+                                <option value="desvinculado">🚫 Desvinculado</option>
+                                <option value="licencia">⚕️ Licencia</option>
+                                <option value="vacaciones">🏖️ Vacaciones</option>
+                            </select>
+                        </div>
+                    `;
                 }
 
                 bodyHTML += `<tr><td class="whitespace-nowrap">${actionHTML}</td>`;
@@ -482,6 +542,23 @@
             tableBody.innerHTML = bodyHTML;
             countRows.textContent = filteredWorkers.length;
         }
+
+        // MARCAR ESTADO ESPECIAL (LICENCIA, VACACIONES, DESVINCULADO)
+        window.cambiarEstadoEspecial = function(id, nuevoEstado) {
+            if(!nuevoEstado) return;
+            const w = allWorkers.find(x => x.id === id);
+            if(!w) return;
+
+            const label = nuevoEstado.toUpperCase();
+            if (confirm(`¿Estás seguro de marcar a ${getField(w, 'nombre')} como ${label}?`)) {
+                w.estado = nuevoEstado;
+                if(w.nombre) {
+                    const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=${encodeURIComponent(label)}&t=${new Date().getTime()}`;
+                    fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al sincronizar estado", err));
+                }
+                applyFilters(); 
+            }
+        };
 
         // GENERAR ACTA INDIVIDUAL
         function generateWorkerPDF(worker, showCodigo) {
@@ -573,8 +650,8 @@
             const w = allWorkers.find(x => x.id === id);
             if(!w) return;
 
-            if (!w.entregado) {
-                w.entregado = true;
+            if (w.estado !== 'entregado') {
+                w.estado = 'entregado';
                 if(w.nombre) {
                     const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=true&t=${new Date().getTime()}`;
                     fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al sincronizar", err));
@@ -590,8 +667,8 @@
             const w = allWorkers.find(x => x.id === id);
             if(!w) return;
 
-            if (confirm(`¿Estás seguro que deseas deshacer la entrega para ${getField(w, 'nombre')}?`)) {
-                w.entregado = false;
+            if (confirm(`¿Estás seguro que deseas deshacer el estado de ${getField(w, 'nombre')} y volverlo a Pendiente?`)) {
+                w.estado = 'pendiente';
                 if(w.nombre) {
                     const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=false&t=${new Date().getTime()}`;
                     fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al deshacer sincronización", err));
@@ -602,7 +679,7 @@
 
         // EXPORTAR EXCEL REPORT Y TOTALES POR TALLA
         document.getElementById('btnExportExcel').addEventListener('click', () => {
-            const deliveredWorkers = allWorkers.filter(w => w.entregado);
+            const deliveredWorkers = allWorkers.filter(w => w.estado === 'entregado');
             if(deliveredWorkers.length === 0) return alert("No hay trabajadores entregados para exportar.");
 
             const wb = XLSX.utils.book_new();
