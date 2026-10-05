@@ -120,8 +120,7 @@
         <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
     </div>
 
-    <!-- Recuerda verificar que la ruta LOGO.png sea la correcta para tu GitHub -->
-    <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
+    <img src="logo.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
     <header>
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3">
@@ -188,7 +187,6 @@
                         Descargar Reporte Excel
                     </button>
 
-                    <!-- NUEVO BOTÓN: Imprimir Resumen PDF -->
                     <button id="btnImprimirResumen" class="glass-btn flex items-center justify-center gap-2 hover:text-blue-500 hover:border-blue-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                         Imprimir Resumen Filtrado
@@ -493,7 +491,7 @@
             let printHTML = `
                 <div class="print-page">
                     <div class="p-header">
-                        <img src="LOGO.png" class="p-logo">
+                        <img src="logo.png" class="p-logo">
                         <div class="p-title">ACTA DE RECEPCIÓN DE EQUIPO DE PROTECCIÓN<br>PERSONAL Y UNIFORME</div>
                     </div>
                     <div class="p-header-line"></div>
@@ -601,7 +599,7 @@
             }
         };
 
-        // EXPORTAR EXCEL REPORT
+        // EXPORTAR EXCEL REPORT Y TOTALES POR TALLA
         document.getElementById('btnExportExcel').addEventListener('click', () => {
             const deliveredWorkers = allWorkers.filter(w => w.entregado);
             if(deliveredWorkers.length === 0) return alert("No hay trabajadores entregados para exportar.");
@@ -620,46 +618,9 @@
             const totals = {};
             deliveredWorkers.forEach(w => {
                 w.epps.forEach((epp, index) => {
-                    let displayNames = [epp.name];
-                    let upName = epp.name.toUpperCase();
-                    if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
-                        const modeloBotin = getField(w, 'modelo botín', 'modelo botin');
-                        if (modeloBotin) {
-                            displayNames = modeloBotin.toString().split(/\s*\/\s*|\s+y\s+/i).map(s => s.trim()).filter(s => s);
-                        } else {
-                            displayNames = ['BOTÍN'];
-                        }
-                    }
-                    if (w.sheet.trim().toUpperCase() === 'PV2' && index === 1) {
-                        let valColJ = w.rawRow[9];
-                        if (valColJ !== undefined && valColJ.toString().trim() !== '') {
-                            displayNames = [valColJ.toString().toUpperCase()];
-                        }
-                    }
-                    displayNames.forEach(dName => {
-                        if(!totals[dName]) totals[dName] = 0;
-                        totals[dName] += epp.qty;
-                    });
-                });
-            });
+                    let detalle = epp.detail;
+                    if(detalle && (detalle.toString().toUpperCase() === 'X' || detalle.toString() === '1' || detalle.toString().toUpperCase() === 'SI')) detalle = ''; 
 
-            const totalsData = Object.keys(totals).map(name => ({ "Elemento / EPP": name, "Cantidad Total Entregada": totals[name] }));
-            totalsData.sort((a, b) => a["Elemento / EPP"].localeCompare(b["Elemento / EPP"]));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(totalsData), "Resumen_Totales");
-
-            XLSX.writeFile(wb, `Reporte_Entregas_${new Date().toISOString().split('T')[0]}.xlsx`);
-        });
-
-        // NUEVA FUNCIÓN: IMPRIMIR RESUMEN PDF
-        document.getElementById('btnImprimirResumen').addEventListener('click', () => {
-            if (filteredWorkers.length === 0) {
-                alert("No hay trabajadores en la vista actual para generar el resumen.");
-                return;
-            }
-
-            const totals = {};
-            filteredWorkers.forEach(w => {
-                w.epps.forEach((epp, index) => {
                     let displayNames = [epp.name];
                     let upName = epp.name.toUpperCase();
                     
@@ -673,80 +634,76 @@
                     }
 
                     if (w.sheet.trim().toUpperCase() === 'PV2' && index === 1) {
+                        let valColH = w.rawRow[7];
                         let valColJ = w.rawRow[9];
                         if (valColJ !== undefined && valColJ.toString().trim() !== '') {
                             displayNames = [valColJ.toString().toUpperCase()];
                         }
+                        if (valColH !== undefined) {
+                            detalle = valColH.toString().toUpperCase();
+                        } else {
+                            detalle = '';
+                        }
                     }
+
+                    let cleanSize = detalle ? detalle.toString().trim().toUpperCase() : "";
 
                     displayNames.forEach(dName => {
                         let itemName = dName.toUpperCase();
-                        if(!totals[itemName]) totals[itemName] = 0;
-                        totals[itemName] += epp.qty;
+                        let key = itemName + "|||" + cleanSize;
+                        
+                        if(!totals[key]) {
+                            totals[key] = { name: itemName, size: cleanSize, qty: 0 };
+                        }
+                        totals[key].qty += epp.qty;
                     });
                 });
             });
 
-            const sortedItems = Object.keys(totals).sort();
+            const totalsData = Object.keys(totals).map(key => ({ 
+                "Elemento / EPP": totals[key].name, 
+                "Talla": totals[key].size || "-",
+                "Cantidad Total Entregada": totals[key].qty 
+            }));
+            
+            totalsData.sort((a, b) => {
+                if(a["Elemento / EPP"] === b["Elemento / EPP"]) return a["Talla"].localeCompare(b["Talla"]);
+                return a["Elemento / EPP"].localeCompare(b["Elemento / EPP"]);
+            });
 
-            const stVal = filterStatus.options[filterStatus.selectedIndex].text;
-            const pVal = filterParque.value || "Todos";
-            const aVal = filterArea.value || "Todas";
-            const cVal = filterCargo.value || "Todos";
-            const ccVal = filterCC.value || "Todos";
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(totalsData), "Resumen_Totales");
 
-            let printHTML = `
-                <div class="print-page">
-                    <div class="p-header">
-                        <img src="LOGO.png" class="p-logo">
-                        <div class="p-title" style="font-size: 15pt;">RESUMEN DE ROPA Y EPP<br><span style="font-size:10pt; font-weight:normal; color:#4b5563;">Listado Consolidado por Filtro</span></div>
-                    </div>
-                    <div class="p-header-line"></div>
-
-                    <div class="p-info-box" style="margin-bottom: 25px;">
-                        <div class="p-info-row"><div class="p-info-label">ESTADO MOSTRADO</div><div class="p-info-value">${stVal}</div></div>
-                        <div class="p-info-row"><div class="p-info-label">PARQUE</div><div class="p-info-value">${pVal}</div></div>
-                        <div class="p-info-row"><div class="p-info-label">ÁREA</div><div class="p-info-value">${aVal}</div></div>
-                        <div class="p-info-row"><div class="p-info-label">CARGO</div><div class="p-info-value">${cVal}</div></div>
-                        <div class="p-info-row"><div class="p-info-label">CENTRO COSTO</div><div class="p-info-value">${ccVal}</div></div>
-                        <div class="p-info-row"><div class="p-info-label">TRABAJADORES</div><div class="p-info-value">${filteredWorkers.length}</div></div>
-                    </div>
-
-                    <table class="p-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 80%; text-align: left;">ELEMENTO / ÍTEM</th>
-                                <th style="width: 20%; text-align: center;">CANTIDAD TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            if (sortedItems.length === 0) {
-                printHTML += `<tr><td colspan="2" style="text-align:center; padding: 20px;">No hay ítems registrados en esta vista</td></tr>`;
-            } else {
-                sortedItems.forEach(item => {
-                    printHTML += `
-                        <tr>
-                            <td>${item}</td>
-                            <td style="text-align:center;">${totals[item]}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            printHTML += `
-                        </tbody>
-                    </table>
-                    <div class="p-table-bottom-line" style="margin-top: 15px;"></div>
-                    <div class="p-decl-text" style="text-align: left;">Documento generado el ${new Date().toLocaleDateString('es-CL')} a las ${new Date().toLocaleTimeString('es-CL')}</div>
-                </div>
-            `;
-
-            printArea.innerHTML = printHTML;
-            setTimeout(() => { window.print(); }, 500);
+            XLSX.writeFile(wb, `Reporte_Entregas_${new Date().toISOString().split('T')[0]}.xlsx`);
         });
 
-    </script>
-</body>
-</html>
+        // IMPRIMIR RESUMEN PDF CON TALLAS
+        document.getElementById('btnImprimirResumen').addEventListener('click', () => {
+            if (filteredWorkers.length === 0) {
+                alert("No hay trabajadores en la vista actual para generar el resumen.");
+                return;
+            }
+
+            const totals = {};
+            filteredWorkers.forEach(w => {
+                w.epps.forEach((epp, index) => {
+                    let detalle = epp.detail;
+                    if(detalle && (detalle.toString().toUpperCase() === 'X' || detalle.toString() === '1' || detalle.toString().toUpperCase() === 'SI')) detalle = ''; 
+
+                    let displayNames = [epp.name];
+                    let upName = epp.name.toUpperCase();
+                    
+                    if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
+                        const modeloBotin = getField(w, 'modelo botín', 'modelo botin');
+                        if (modeloBotin) {
+                            displayNames = modeloBotin.toString().split(/\s*\/\s*|\s+y\s+/i).map(s => s.trim()).filter(s => s);
+                        } else {
+                            displayNames = ['BOTÍN'];
+                        }
+                    }
+
+                    if (w.sheet.trim().toUpperCase() === 'PV2' && index === 1) {
+                        let valColH = w.rawRow[7];
+                        let valColJ = w.rawRow[9];
+                        if (valColJ !== undefined && valColJ.toString().trim() !== '') {
+                            displayNames = [valColJ.toString().toUpperCase()];
+                        }
