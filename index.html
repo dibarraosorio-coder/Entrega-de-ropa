@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Entrega de Ropa y EPP</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Cinzel:wght@400;500;600&family=Dancing+Script:wght@400;500&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,800&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-body: #0B1411; --bg-gradient: linear-gradient(145deg, #0B1411 0%, #070d0a 100%);
+            --header-bg: linear-gradient(160deg, rgba(11,20,17,.98) 0%, rgba(18,30,24,.96) 50%, rgba(11,20,17,.92) 100%);
+            --header-bg-solid: #121e18; --header-title: #E5DECE; --text-main: #E5DECE; --text-muted: #84968C;
+            --glass-bg: rgba(26,44,35, 0.6); --glass-border: rgba(229, 222, 206, 0.08);
+            --card-bg: #121E18; --input-bg: rgba(26,44,35,0.8); --input-border: rgba(229,222,206,0.1);
+            --btn-bg: rgba(26,44,35,0.8); --btn-hover: rgba(229,222,206,0.1);
+            --accent-gold: #B39266; --neon-red: #8B3A3A; --radius: 12px;
+        }
+        body.light-mode {
+            --bg-body: #fdfbf7; --bg-gradient: linear-gradient(145deg, #fdfbf7 0%, #EAE2D2 100%);
+            --header-bg: #EAE2D2; --header-bg-solid: #eae2d2; --header-title: #2d2822;
+            --text-main: #2d2822; --text-muted: #6b6357; --glass-bg: rgba(234, 226, 210, 0.6);
+            --glass-border: #BDB2A0; --card-bg: #EAE2D2; --input-bg: #F5F0E6; --input-border: #BDB2A0;
+            --btn-bg: #F5F0E6; --btn-hover: #BDB2A0; --accent-gold: #AE8A77; --neon-red: #dc2626;
+        }
+        body.theme-gray {
+            --bg-body: #F4F5F6; --bg-gradient: linear-gradient(145deg, #F4F5F6 0%, #E5E7EB 100%);
+            --header-bg: #E5E7EB; --header-bg-solid: #e5e7eb; --header-title: #374151;
+            --text-main: #374151; --text-muted: #6B7280; --glass-bg: rgba(229, 231, 235, 0.6);
+            --glass-border: #D1D5DB; --card-bg: #FFFFFF; --input-bg: #F9FAFB; --input-border: #D1D5DB;
+            --btn-bg: #F9FAFB; --btn-hover: #D1D5DB; --accent-gold: #4B5563; --neon-red: #EF4444;
+        }
+        body.theme-blue {
+            --bg-body: #F0F9FF; --bg-gradient: linear-gradient(145deg, #F0F9FF 0%, #E0F2FE 100%);
+            --header-bg: #E0F2FE; --header-bg-solid: #e0f2fe; --header-title: #0C4A6E;
+            --text-main: #0284C7; --text-muted: #0369A1; --glass-bg: rgba(224, 242, 254, 0.6);
+            --glass-border: #BAE6FD; --card-bg: #FFFFFF; --input-bg: #F8FAFC; --input-border: #BAE6FD;
+            --btn-bg: #FFFFFF; --btn-hover: #BAE6FD; --accent-gold: #0284C7; --neon-red: #EF4444;
+        }
+        body.theme-pink {
+            --bg-body: #FDF2F8; --bg-gradient: linear-gradient(145deg, #FDF2F8 0%, #FCE7F3 100%);
+            --header-bg: #FCE7F3; --header-bg-solid: #fce7f3; --header-title: #831843;
+            --text-main: #9D174D; --text-muted: #BE185D; --glass-bg: rgba(252, 231, 243, 0.6);
+            --glass-border: #FBCFE8; --card-bg: #FFFFFF; --input-bg: #FFF1F2; --input-border: #FBCFE8;
+            --btn-bg: #FFFFFF; --btn-hover: #FBCFE8; --accent-gold: #DB2777; --neon-red: #EF4444;
+        }
+
+        body { font-family: 'Nunito', sans-serif; background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
+        header { position: relative; text-align: center; padding: 40px 24px 20px; background: var(--header-bg); border-bottom: 1px solid var(--glass-border); }
+        .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; color: var(--header-title); text-transform: uppercase; letter-spacing: .08em; }
+        .header-subtitle { font-family: 'Cinzel', serif; font-size: .7rem; color: var(--accent-gold); margin-top: 12px; letter-spacing: .25em; text-transform: uppercase; font-weight: 700; }
+
+        .top-action-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--accent-gold); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; }
+        .top-action-btn:hover { background: var(--btn-hover); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        .glass-panel { background: var(--card-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); border-radius: var(--radius); padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+        .glass-panel:hover { border-color: var(--accent-gold); }
+        .glass-input, .glass-select { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); border-radius: 8px; padding: 10px 14px; width: 100%; outline: none; transition: all 0.2s; font-family: 'Nunito', sans-serif; font-weight: 600; }
+        .glass-input:focus, .glass-select:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 2px rgba(179, 146, 102, 0.2); }
+        
+        .glass-btn { background: var(--btn-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+        .glass-btn:hover { background: var(--accent-gold); color: #111; border-color: var(--accent-gold); }
+        
+        .glass-btn-primary { background: var(--accent-gold); border: 1px solid var(--accent-gold); color: #111; padding: 6px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(179,146,102,0.3);}
+        .glass-btn-primary:hover { background: #fff; border-color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(179,146,102,0.5);}
+
+        .glass-table { width: 100%; border-collapse: collapse; color: var(--text-main); }
+        .glass-table th { background: var(--header-bg-solid); color: var(--accent-gold); padding: 12px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid var(--accent-gold); position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .glass-table td { padding: 12px; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem; font-weight: 600; }
+        .glass-table tr:hover td { background: rgba(179, 146, 102, 0.05); }
+
+        .custom-checkbox { appearance: none; width: 18px; height: 18px; border: 2px solid var(--text-muted); border-radius: 4px; outline: none; cursor: pointer; transition: all 0.2s; position: relative; }
+        .custom-checkbox:checked { border-color: var(--accent-gold); background: var(--accent-gold); }
+        .custom-checkbox:checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 10px; border: solid #111; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+        #loadingOverlay { position: fixed; inset: 0; background: var(--bg-gradient); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        
+        #print-area { display: none; }
+        @media print {
+            body { background: white !important; }
+            body > header, body > main, #loadingOverlay { display: none !important; }
+            #print-area { display: block; position: relative; width: 100%; }
+            .print-page { page-break-after: always; width: 215.9mm; height: 279.4mm; padding: 15mm 20mm; box-sizing: border-box; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; color: #000; }
+            .p-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .p-logo { width: 240px; object-fit: contain; }
+            .p-title { color: #145c34; font-size: 13pt; font-weight: 800; text-align: left; line-height: 1.2; max-width: 400px; margin-left: 20px; }
+            .p-header-line { border-bottom: 3px solid #145c34; margin-bottom: 20px; }
+            .p-info-box { border-left: 3px solid #145c34; padding-left: 15px; margin-left: 5px; margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; }
+            .p-info-row { display: flex; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+            .p-info-label { width: 130px; color: #145c34; font-size: 8pt; font-weight: bold; text-transform: uppercase; }
+            .p-info-value { font-size: 9pt; font-weight: bold; text-transform: uppercase; color: #000; }
+            .p-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+            .p-table th { color: #9ca3af; font-size: 8pt; font-weight: bold; text-transform: uppercase; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; }
+            .p-table td { padding: 10px 0; font-size: 9pt; color: #1f2937; border-bottom: 1px solid #e5e7eb; font-weight: bold; }
+            .p-table-bottom-line { border-bottom: 3px solid #145c34; margin-bottom: 40px; }
+            .p-decl-line { border-top: 1px solid #e5e7eb; width: 100%; margin: 0 auto 15px auto; }
+            .p-decl-text { text-align: center; font-style: italic; font-size: 9pt; color: #4b5563; margin-bottom: 40px; }
+            .p-footer { display: flex; justify-content: space-between; align-items: flex-end; }
+            .p-sig-left { width: 200px; }
+            .p-sig-label { color: #145c34; font-size: 8pt; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
+            .p-date-text { font-size: 12pt; text-align: center; letter-spacing: 2px; margin-bottom: 5px; color: #4b5563; }
+            .p-thick-line { border-bottom: 2px solid #000; width: 100%; }
+            .p-sig-right { width: 320px; }
+            .p-sig-box { border: 2px solid #000; height: 80px; width: 100%; border-radius: 4px; margin-bottom: 5px; }
+            .p-sig-name-line { border-top: 1px solid #000; padding-top: 5px; text-align: center; font-size: 8pt; font-weight: bold; text-transform: uppercase; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="loadingOverlay">
+        <svg class="animate-spin h-12 w-12 text-[var(--accent-gold)] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
+    </div>
+
+    <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
+
+    <header>
+        <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3">
+            <!-- REEMPLAZA EL ENLACE DE ABAJO CON EL DE TU PLANILLA REAL -->
+            <a href="https://docs.google.com/spreadsheets/d/1O5dCq8k-8Wc07_c1E-m-1gO-B4G_E0sC6q5U_G2wHls/edit" target="_blank" class="top-action-btn" title="Ir a Planilla Excel">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Listado General
+            </a>
+            <button class="top-action-btn" onclick="toggleTheme()" title="Cambiar Tema de Color">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.5 2 12 2z"></path></svg>
+            </button>
+        </div>
+        <div class="header-title mt-4 sm:mt-0">PARQUE DEL RECUERDO</div>
+        <div class="header-subtitle">Gestión de Entrega de Ropa y EPP — Verano 2027</div>
+    </header>
+
+    <main class="w-full px-4 sm:px-8 mt-8 mb-12">
+        <div id="dashboard" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
+                
+                <div class="glass-panel xl:col-span-3">
+                    <h2 class="text-lg font-bold mb-4 text-[var(--accent-gold)] uppercase tracking-wider">Filtros & Búsqueda</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Buscar</label>
+                            <input type="text" id="filterSearch" placeholder="Nombre o RUT..." class="glass-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Estado</label>
+                            <select id="filterStatus" class="glass-select">
+                                <option value="">Todos los Estados</option>
+                                <option value="pendiente">Pendientes</option>
+                                <option value="entregado">Entregados</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Parque</label>
+                            <select id="filterParque" class="glass-select"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Área</label>
+                            <select id="filterArea" class="glass-select"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Cargo</label>
+                            <select id="filterCargo" class="glass-select"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1">Centro Costo</label>
+                            <select id="filterCC" class="glass-select"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel flex flex-col justify-center gap-4">
+                    <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider">Reporte Final y Opciones</h2>
+                    
+                    <label class="flex items-center cursor-pointer mb-2 p-2 rounded bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+                        <input type="checkbox" id="toggleCodigo" class="custom-checkbox">
+                        <span class="ml-3 text-sm font-bold text-[var(--text-main)]">Incluir CÓDIGO en PDF</span>
+                    </label>
+
+                    <button id="btnExportExcel" class="glass-btn flex items-center justify-center gap-2 hover:text-green-500 hover:border-green-500">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Descargar Reporte Excel
+                    </button>
+                    <!-- El botón oculto para que no dé error en el JS si existe el EventListener -->
+                    <button id="btnGeneratePDF" style="display:none;"></button>
+                </div>
+            </div>
+
+            <div class="glass-panel overflow-hidden p-0">
+                <div class="p-4 border-b border-[var(--glass-border)] flex justify-between items-center bg-[var(--input-bg)]">
+                    <h2 class="text-lg font-bold text-[var(--accent-gold)] tracking-widest">LISTADO DE TRABAJADORES</h2>
+                    <span class="text-sm font-bold px-3 py-1 rounded bg-[var(--glass-bg)] text-[var(--text-main)] border border-[var(--glass-border)]">
+                        Total Mostrados: <span id="countRows">0</span>
+                    </span>
+                </div>
+                <div class="overflow-x-auto max-h-[650px]">
+                    <table class="glass-table">
+                        <thead>
+                            <tr id="tableHeader"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="print-area"></div>
+
+    <script>
+        // CONFIGURACIÓN TEMA
+        const themes = ['dark', 'light', 'theme-gray', 'theme-blue', 'theme-pink'];
+        let currentThemeIndex = 0;
+        function applyThemeClass(themeName) {
+            document.body.classList.remove('light-mode', 'theme-gray', 'theme-blue', 'theme-pink');
+            if (themeName === 'light') document.body.classList.add('light-mode');
+            else if (themeName !== 'dark') document.body.classList.add(themeName);
+        }
+        function toggleTheme() {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            const newTheme = themes[currentThemeIndex];
+            localStorage.setItem('ropaTheme', newTheme);
+            applyThemeClass(newTheme);
+        }
+        let savedTheme = localStorage.getItem('ropaTheme') || 'dark';
+        currentThemeIndex = themes.indexOf(savedTheme);
+        if (currentThemeIndex === -1) currentThemeIndex = 0;
+        applyThemeClass(savedTheme);
+
+        const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHHShfOu3YUX4youw2hhKO9B2dPiCuKVORmZz5ppoPvd8qjpQ0JRQPxol6RTMGNTLgQA/exec";
+
+        let allWorkers = [];
+        let filteredWorkers = [];
+        let infoColumnsOrder = [];
+        let eppColumnsOrder = [];
+        
+        const dashboard = document.getElementById('dashboard');
+        const filterSearch = document.getElementById('filterSearch');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterParque = document.getElementById('filterParque');
+        const filterArea = document.getElementById('filterArea');
+        const filterCargo = document.getElementById('filterCargo');
+        const filterCC = document.getElementById('filterCC');
+        const tableHeader = document.getElementById('tableHeader');
+        const tableBody = document.getElementById('tableBody');
+        const countRows = document.getElementById('countRows');
+        const printArea = document.getElementById('print-area');
+        const toggleCodigo = document.getElementById('toggleCodigo');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // KEYWORDS ESTRICTAS (Soluciona el problema de esconder los pantalones)
+        const infoKeywordsExact = ['nombre', 'rut', 'cargo', 'centro costo', 'cc', 'parque', 'id', 'modelo botín', 'modelo botin', 'doble dotación', 'doble dotacion', 'area', 'área', 'entregado'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch(URL_GOOGLE_SCRIPT)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    if (!data.xlsxBase64) throw new Error("Faltan datos en la respuesta.");
+                    
+                    const workbook = XLSX.read(data.xlsxBase64, { type: 'base64' });
+                    allWorkers = []; infoColumnsOrder = []; eppColumnsOrder = [];
+                    
+                    workbook.SheetNames.forEach(sheetName => {
+                        // Ignorar hojas autogeneradas por seguridad visual
+                        if(sheetName.toUpperCase().indexOf("ENTREGADA") === 0 || sheetName.toUpperCase() === "CONSUMO GENERAL") return;
+
+                        const sheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        if (rows.length < 2) return;
+
+                        let headerRowIdx = -1;
+                        for(let i = 0; i < Math.min(5, rows.length); i++) {
+                            if (rows[i].some(cell => cell && cell.toString().toLowerCase().includes('nombre'))) {
+                                headerRowIdx = i; break;
+                            }
+                        }
+                        if (headerRowIdx === -1) return;
+
+                        let qtyRowIdx = (headerRowIdx === 1) ? 0 : ((headerRowIdx === 0) ? 1 : headerRowIdx - 1);
+                        const headers = rows[headerRowIdx];
+                        const qtyRow = rows[qtyRowIdx] || [];
+                        
+                        let sheetInfoCols = []; let sheetEppCols = [];
+
+                        headers.forEach((headerName, idx) => {
+                            if (!headerName) return;
+                            const hStr = headerName.toString().trim();
+                            const hLower = hStr.toLowerCase();
+                            
+                            // Lógica Estricta de asignación
+                            if (infoKeywordsExact.includes(hLower)) {
+                                sheetInfoCols.push({ name: hStr, index: idx });
+                                if(!infoColumnsOrder.includes(hStr) && hLower !== 'entregado') {
+                                    infoColumnsOrder.push(hStr);
+                                }
+                            } else {
+                                let qty = qtyRow[idx];
+                                qty = (qty !== undefined && qty !== null && qty !== '' && !isNaN(qty)) ? Number(qty) : 1;
+                                sheetEppCols.push({ name: hStr, index: idx, qty: qty });
+                                if(!eppColumnsOrder.includes(hStr)) eppColumnsOrder.push(hStr);
+                            }
+                        });
+
+                        const entregadoColInfo = sheetInfoCols.find(c => c.name.toLowerCase() === 'entregado');
+
+                        for(let i = Math.max(headerRowIdx, qtyRowIdx) + 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            if (!row || row.length === 0) continue;
+                            const nameCol = sheetInfoCols.find(c => c.name.toLowerCase().includes('nombre'));
+                            if (!nameCol || !row[nameCol.index]) continue;
+
+                            let currentNombre = row[nameCol.index];
+                            let isEntregado = entregadoColInfo && row[entregadoColInfo.index] === 'SI';
+
+                            let worker = { 
+                                id: sheetName + '_' + i, 
+                                nombre: currentNombre,
+                                sheet: sheetName,
+                                entregado: isEntregado, 
+                                info: {}, 
+                                epps: [] 
+                            };
+                            
+                            sheetInfoCols.forEach(col => { 
+                                if(col.name.toLowerCase() !== 'entregado') worker.info[col.name] = row[col.index] || ''; 
+                            });
+                            
+                            sheetEppCols.forEach(col => {
+                                const cellValue = row[col.index];
+                                if (cellValue !== undefined && cellValue !== null && cellValue.toString().trim() !== '') {
+                                    worker.epps.push({ name: col.name, qty: col.qty, detail: cellValue });
+                                }
+                            });
+                            allWorkers.push(worker);
+                        }
+                    });
+
+                    if (allWorkers.length > 0) {
+                        initializeDashboard();
+                        loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    } else {
+                        alert("No se encontraron datos.");
+                        loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    }
+                })
+                .catch(error => {
+                    alert("Error al cargar la base de datos: " + error.message);
+                    loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                });
+        });
+
+        // Búsqueda inteligente de columnas sin usar el conflictivo 'includes'
+        function getField(worker, ...keywords) {
+            const col = infoColumnsOrder.find(c => {
+                let cl = c.toLowerCase();
+                return keywords.some(k => cl === k || cl.includes(k));
+            });
+            const val = col ? worker.info[col] : '';
+            return (val !== undefined && val !== null) ? String(val).trim() : '';
+        }
+
+        function initializeDashboard() {
+            dashboard.classList.remove('hidden');
+            filterSearch.value = ''; filterStatus.value = ''; filterParque.value = ''; filterArea.value = ''; filterCargo.value = ''; filterCC.value = '';
+            
+            filterSearch.addEventListener('input', applyFilters);
+            filterStatus.addEventListener('change', applyFilters);
+            filterParque.addEventListener('change', applyFilters); 
+            filterArea.addEventListener('change', applyFilters);
+            filterCargo.addEventListener('change', applyFilters); 
+            filterCC.addEventListener('change', applyFilters);
+            applyFilters();
+        }
+
+        function getFilteredOptions(targetKeyword1, targetKeyword2, ignoreDropdown) {
+            const sVal = filterSearch.value.toLowerCase().trim();
+            const stVal = filterStatus.value;
+            const pVal = ignoreDropdown === 'parque' ? '' : filterParque.value;
+            const aVal = ignoreDropdown === 'area' ? '' : filterArea.value;
+            const cVal = ignoreDropdown === 'cargo' ? '' : filterCargo.value;
+            const ccVal = ignoreDropdown === 'cc' ? '' : filterCC.value;
+
+            const tempFiltered = allWorkers.filter(w => {
+                if (sVal) {
+                    const nombre = getField(w, 'nombre').toLowerCase();
+                    const rut = getField(w, 'rut').toLowerCase();
+                    if (!nombre.includes(sVal) && !rut.includes(sVal)) return false;
+                }
+                if (stVal === 'entregado' && !w.entregado) return false;
+                if (stVal === 'pendiente' && w.entregado) return false;
+                if (pVal && getField(w, 'parque') !== pVal) return false;
+                if (aVal && getField(w, 'area', 'área') !== aVal) return false;
+                if (cVal && getField(w, 'cargo') !== cVal) return false;
+                if (ccVal && getField(w, 'centro', 'costo') !== ccVal) return false;
+                return true;
+            });
+
+            let values = new Set();
+            tempFiltered.forEach(w => {
+                const val = getField(w, targetKeyword1, targetKeyword2);
+                if (val) values.add(val);
+            });
+            return Array.from(values).sort();
+        }
+
+        function fillSelect(selectElement, optionsArray, selectedValue) {
+            selectElement.innerHTML = '<option value="">Todos</option>';
+            optionsArray.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt; option.textContent = opt;
+                if(opt === selectedValue) option.selected = true;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const sVal = filterSearch.value.toLowerCase().trim();
+            const stVal = filterStatus.value;
+            const pVal = filterParque.value; const aVal = filterArea.value;
+            const cVal = filterCargo.value; const ccVal = filterCC.value;
+
+            filteredWorkers = allWorkers.filter(w => {
+                if (sVal) {
+                    const nombre = getField(w, 'nombre').toLowerCase();
+                    const rut = getField(w, 'rut').toLowerCase();
+                    if (!nombre.includes(sVal) && !rut.includes(sVal)) return false;
+                }
+                if (stVal === 'entregado' && !w.entregado) return false;
+                if (stVal === 'pendiente' && w.entregado) return false;
+                if (pVal && getField(w, 'parque') !== pVal) return false;
+                if (aVal && getField(w, 'area', 'área') !== aVal) return false;
+                if (cVal && getField(w, 'cargo') !== cVal) return false;
+                if (ccVal && getField(w, 'centro', 'costo') !== ccVal) return false;
+                return true;
+            });
+
+            fillSelect(filterParque, getFilteredOptions('parque', 'parque', 'parque'), pVal);
+            fillSelect(filterArea, getFilteredOptions('area', 'área', 'area'), aVal);
+            fillSelect(filterCargo, getFilteredOptions('cargo', 'cargo', 'cargo'), cVal);
+            fillSelect(filterCC, getFilteredOptions('centro', 'costo', 'cc'), ccVal);
+            renderTable();
+        }
+
+        function renderTable() {
+            let headersHTML = `<th>ESTADO / ACCIÓN</th>`;
+            const displayCols = infoColumnsOrder.slice(0, 5);
+            displayCols.forEach(col => { headersHTML += `<th>${col}</th>`; });
+            headersHTML += `<th>Total EPPs</th>`;
+            tableHeader.innerHTML = headersHTML;
+
+            let bodyHTML = '';
+            filteredWorkers.forEach(w => {
+                let actionHTML = '';
+                if(w.entregado) {
+                    actionHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">✓ ENTREGADO</span>
+                            <button onclick="generarActaIndividual('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Reimprimir Acta">🖨️</button>
+                        </div>
+                    `;
+                } else {
+                    actionHTML = `<button onclick="generarActaIndividual('${w.id}')" class="glass-btn-primary w-full text-center py-1.5 shadow-md">📄 Generar Acta</button>`;
+                }
+
+                bodyHTML += `<tr><td class="whitespace-nowrap">${actionHTML}</td>`;
+                displayCols.forEach(col => { bodyHTML += `<td>${w.info[col] || '-'}</td>`; });
+                bodyHTML += `<td><span style="color:var(--accent-gold)">${w.epps.length} ítems</span></td></tr>`;
+            });
+            tableBody.innerHTML = bodyHTML;
+            countRows.textContent = filteredWorkers.length;
+        }
+
+        // FUNCIÓN AUXILIAR PARA GENERAR LA ESTRUCTURA DEL PDF
+        function generateWorkerPDF(worker, showCodigo) {
+            const nombre = getField(worker, 'nombre'); const rut = getField(worker, 'rut');
+            const parque = getField(worker, 'parque'); const area = getField(worker, 'area', 'área');
+            const cargo = getField(worker, 'cargo'); const cc = getField(worker, 'centro', 'costo');
+
+            let printHTML = `
+                <div class="print-page">
+                    <div class="p-header">
+                        <img src="LOGO.png" class="p-logo">
+                        <div class="p-title">ACTA DE RECEPCIÓN DE EQUIPO DE PROTECCIÓN<br>PERSONAL Y UNIFORME</div>
+                    </div>
+                    <div class="p-header-line"></div>
+
+                    <div class="p-info-box">
+                        <div class="p-info-row"><div class="p-info-label">NOMBRE</div><div class="p-info-value">${nombre}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">RUT</div><div class="p-info-value">${rut}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">PARQUE</div><div class="p-info-value">${parque}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">ÁREA</div><div class="p-info-value">${area}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">CARGO</div><div class="p-info-value">${cargo}</div></div>
+                        <div class="p-info-row"><div class="p-info-label">CENTRO COSTO</div><div class="p-info-value">${cc}</div></div>
+                    </div>
+
+                    <table class="p-table">
+                        <thead>
+                            <tr>
+            `;
+            
+            if (showCodigo) printHTML += `<th style="width: 20%; padding-left:5px;">CÓDIGO</th><th style="width: 15%; text-align: center;">CANTIDAD</th><th style="width: 50%;">ITEM</th><th style="width: 15%; text-align: center;">TALLA</th>`;
+            else printHTML += `<th style="width: 15%; text-align: center;">CANTIDAD</th><th style="width: 70%;">ITEM</th><th style="width: 15%; text-align: center;">TALLA</th>`;
+            printHTML += `</tr></thead><tbody>`;
+
+            if(worker.epps.length === 0) printHTML += `<tr><td colspan="${showCodigo ? 4 : 3}" style="text-align:center;">Sin EPP asignados</td></tr>`;
+            else {
+                worker.epps.forEach(epp => {
+                    let detalle = epp.detail;
+                    if(detalle && (detalle.toString().toUpperCase() === 'X' || detalle.toString() === '1' || detalle.toString().toUpperCase() === 'SI')) detalle = ''; 
+
+                    let upName = epp.name.toUpperCase();
+                    let displayNames = [epp.name];
+                    
+                    // FRACCIONAMIENTO INTELIGENTE DE ZAPATOS
+                    if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
+                        const modeloBotin = getField(worker, 'modelo botín', 'modelo botin');
+                        if (modeloBotin) {
+                            displayNames = modeloBotin.toString().split(/\s*\/\s*|\s+y\s+/i).map(s => s.trim()).filter(s => s);
+                        } else {
+                            displayNames = ['BOTÍN'];
+                        }
+                    }
+
+                    displayNames.forEach(dName => {
+                        printHTML += `<tr>`;
+                        if (showCodigo) printHTML += `<td style="padding-left:5px;"></td>`;
+                        printHTML += `<td style="text-align:center;">${epp.qty}</td><td>${dName}</td><td style="text-align:center;">${detalle}</td></tr>`;
+                    });
+                });
+            }
+
+            printHTML += `
+                        </tbody>
+                    </table>
+                    <div class="p-table-bottom-line"></div>
+                    <div class="p-decl-line"></div>
+                    <div class="p-decl-text">Declaro recibir conforme los elementos arriba detallados para mi uso personal y obligatorio durante la jornada laboral.</div>
+                    <div class="p-footer">
+                        <div class="p-sig-left"><div class="p-sig-label">FECHA DE ENTREGA</div><div class="p-date-text">_______ / _______ /<br>2027</div><div class="p-thick-line"></div></div>
+                        <div class="p-sig-right"><div class="p-sig-label">FIRMA DEL TRABAJADOR</div><div class="p-sig-box"></div><div class="p-sig-name-line">${nombre}</div></div>
+                    </div>
+                </div>
+            `;
+            return printHTML;
+        }
+
+        // GENERADOR INDIVIDUAL Y SINCRONIZADOR
+        window.generarActaIndividual = function(id) {
+            const w = allWorkers.find(x => x.id === id);
+            if(!w) return;
+
+            if (!w.entregado) {
+                w.entregado = true;
+                if(w.nombre) {
+                    const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=true&t=${new Date().getTime()}`;
+                    fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al sincronizar", err));
+                }
+                renderTable(); 
+            }
+
+            printArea.innerHTML = generateWorkerPDF(w, toggleCodigo.checked);
+            setTimeout(() => { window.print(); }, 500);
+        };
+
+        // EXPORTAR EXCEL REPORT
+        document.getElementById('btnExportExcel').addEventListener('click', () => {
+            const deliveredWorkers = allWorkers.filter(w => w.entregado);
+            if(deliveredWorkers.length === 0) return alert("No hay trabajadores entregados para exportar.");
+
+            const wb = XLSX.utils.book_new();
+            
+            // HOJA 1: DETALLES
+            const exportData = deliveredWorkers.map(w => {
+                let rowData = { "Estado": "Entregado" };
+                infoColumnsOrder.forEach(col => { rowData[col] = w.info[col] || ''; });
+                eppColumnsOrder.forEach(eppCol => { rowData[eppCol] = 0; });
+                w.epps.forEach(epp => { rowData[epp.name] = epp.qty; });
+                return rowData;
+            });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportData), "Detalle_Entregas");
+
+            // HOJA 2: TOTALES Y RESUMEN INTELIGENTE
+            const totals = {};
+            deliveredWorkers.forEach(w => {
+                w.epps.forEach(epp => {
+                    let displayNames = [epp.name];
+                    let upName = epp.name.toUpperCase();
+                    if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
+                        const modeloBotin = getField(w, 'modelo botín', 'modelo botin');
+                        if (modeloBotin) {
+                            displayNames = modeloBotin.toString().split(/\s*\/\s*|\s+y\s+/i).map(s => s.trim()).filter(s => s);
+                        } else {
+                            displayNames = ['BOTÍN'];
+                        }
+                    }
+                    displayNames.forEach(dName => {
+                        if(!totals[dName]) totals[dName] = 0;
+                        totals[dName] += epp.qty;
+                    });
+                });
+            });
+
+            const totalsData = Object.keys(totals).map(name => ({ "Elemento / EPP": name, "Cantidad Total Entregada": totals[name] }));
+            totalsData.sort((a, b) => a["Elemento / EPP"].localeCompare(b["Elemento / EPP"]));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(totalsData), "Resumen_Totales");
+
+            XLSX.writeFile(wb, `Reporte_Entregas_${new Date().toISOString().split('T')[0]}.xlsx`);
+        });
+    </script>
+</body>
+</html>
