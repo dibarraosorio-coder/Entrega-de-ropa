@@ -124,7 +124,6 @@
 
     <header>
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3">
-            <!-- REEMPLAZA EL ENLACE DE ABAJO CON EL DE TU PLANILLA REAL -->
             <a href="https://docs.google.com/spreadsheets/d/1O5dCq8k-8Wc07_c1E-m-1gO-B4G_E0sC6q5U_G2wHls/edit" target="_blank" class="top-action-btn" title="Ir a Planilla Excel">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Listado General
@@ -322,13 +321,15 @@
                             let currentNombre = row[nameCol.index];
                             let isEntregado = entregadoColInfo && row[entregadoColInfo.index] === 'SI';
 
+                            // AÑADIDO: 'rawRow: row' para poder interceptar valores exactos de columnas como la H o la J
                             let worker = { 
                                 id: sheetName + '_' + i, 
                                 nombre: currentNombre,
                                 sheet: sheetName,
                                 entregado: isEntregado, 
                                 info: {}, 
-                                epps: [] 
+                                epps: [],
+                                rawRow: row 
                             };
                             
                             sheetInfoCols.forEach(col => { 
@@ -515,14 +516,15 @@
 
             if(worker.epps.length === 0) printHTML += `<tr><td colspan="${showCodigo ? 4 : 3}" style="text-align:center;">Sin EPP asignados</td></tr>`;
             else {
-                worker.epps.forEach(epp => {
+                // AÑADIDO: el parámetro "index" en el forEach para identificar la posición del item
+                worker.epps.forEach((epp, index) => {
                     let detalle = epp.detail;
                     if(detalle && (detalle.toString().toUpperCase() === 'X' || detalle.toString() === '1' || detalle.toString().toUpperCase() === 'SI')) detalle = ''; 
 
                     let upName = epp.name.toUpperCase();
                     let displayNames = [epp.name];
                     
-                    // FRACCIONAMIENTO INTELIGENTE DE ZAPATOS
+                    // FRACCIONAMIENTO INTELIGENTE DE ZAPATOS (Por defecto)
                     if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
                         const modeloBotin = getField(worker, 'modelo botín', 'modelo botin');
                         if (modeloBotin) {
@@ -531,6 +533,27 @@
                             displayNames = ['BOTÍN'];
                         }
                     }
+
+                    // ====== REGLA ESTRICTA SOLO PARA PV2 Y SEGUNDO ITEM ======
+                    // Verificamos si la hoja es PV2 y si es el segundo elemento a imprimir (index === 1)
+                    if (worker.sheet.trim().toUpperCase() === 'PV2' && index === 1) {
+                        // En arrays JS, la columna H es el índice 7 y la columna J es el índice 9
+                        let valColH = worker.rawRow[7];
+                        let valColJ = worker.rawRow[9];
+                        
+                        // Sobrescribimos el Nombre del Item con el valor de la Columna J
+                        if (valColJ !== undefined && valColJ.toString().trim() !== '') {
+                            displayNames = [valColJ.toString().toUpperCase()];
+                        }
+                        
+                        // Sobrescribimos la Talla con el valor de la Columna H
+                        if (valColH !== undefined) {
+                            detalle = valColH.toString().toUpperCase();
+                        } else {
+                            detalle = '';
+                        }
+                    }
+                    // ==========================================================
 
                     displayNames.forEach(dName => {
                         printHTML += `<tr>`;
@@ -573,22 +596,17 @@
             setTimeout(() => { window.print(); }, 500);
         };
 
-        // NUEVA FUNCIÓN: DESHACER ENTREGA
+        // FUNCIÓN: DESHACER ENTREGA
         window.deshacerEntrega = function(id) {
             const w = allWorkers.find(x => x.id === id);
             if(!w) return;
 
-            // Alerta de confirmación para evitar revertir accidentalmente
             if (confirm(`¿Estás seguro que deseas deshacer la entrega para ${getField(w, 'nombre')}?`)) {
                 w.entregado = false;
                 if(w.nombre) {
-                    // Enviamos status=false al Apps Script
                     const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=false&t=${new Date().getTime()}`;
                     fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al deshacer sincronización", err));
                 }
-                
-                // En vez de renderTable(), llamamos a applyFilters()
-                // De esta manera, si la tabla está filtrada en "Entregados", la fila desaparece de inmediato.
                 applyFilters(); 
             }
         };
