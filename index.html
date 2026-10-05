@@ -466,6 +466,7 @@
                         <div class="flex items-center gap-2">
                             <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">✓ ENTREGADO</span>
                             <button onclick="generarActaIndividual('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Reimprimir Acta">🖨️</button>
+                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-red-500 hover:border-red-500" title="Deshacer Entrega" style="color: #ef4444;">↩️</button>
                         </div>
                     `;
                 } else {
@@ -570,6 +571,26 @@
 
             printArea.innerHTML = generateWorkerPDF(w, toggleCodigo.checked);
             setTimeout(() => { window.print(); }, 500);
+        };
+
+        // NUEVA FUNCIÓN: DESHACER ENTREGA
+        window.deshacerEntrega = function(id) {
+            const w = allWorkers.find(x => x.id === id);
+            if(!w) return;
+
+            // Alerta de confirmación para evitar revertir accidentalmente
+            if (confirm(`¿Estás seguro que deseas deshacer la entrega para ${getField(w, 'nombre')}?`)) {
+                w.entregado = false;
+                if(w.nombre) {
+                    // Enviamos status=false al Apps Script
+                    const url = URL_GOOGLE_SCRIPT + `?action=update&sheet=${encodeURIComponent(w.sheet)}&nombre=${encodeURIComponent(w.nombre)}&status=false&t=${new Date().getTime()}`;
+                    fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error al deshacer sincronización", err));
+                }
+                
+                // En vez de renderTable(), llamamos a applyFilters()
+                // De esta manera, si la tabla está filtrada en "Entregados", la fila desaparece de inmediato.
+                applyFilters(); 
+            }
         };
 
         // EXPORTAR EXCEL REPORT
