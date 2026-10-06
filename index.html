@@ -125,10 +125,17 @@
 
     <header>
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3">
+            <!-- Botón Sincronizar Suave -->
+            <button class="top-action-btn" onclick="syncData(false)" title="Actualizar datos con el Excel sin perder filtros">
+                <svg id="syncIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span class="hidden sm:inline">Actualizar</span>
+            </button>
+            
             <a href="https://docs.google.com/spreadsheets/d/1O5dCq8k-8Wc07_c1E-m-1gO-B4G_E0sC6q5U_G2wHls/edit" target="_blank" class="top-action-btn" title="Ir a Planilla Excel">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Listado General
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 hidden sm:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Excel
             </a>
+            
             <button class="top-action-btn" onclick="toggleTheme()" title="Cambiar Tema de Color">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.5 2 12 2z"></path></svg>
             </button>
@@ -283,7 +290,15 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // LÓGICA DE SINCRONIZACIÓN (NUEVA FUNCIÓN)
+        window.syncData = function(isFirstLoad = false) {
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('animate-spin');
+            
+            if (isFirstLoad) {
+                loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+
             fetch(URL_GOOGLE_SCRIPT)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
@@ -377,17 +392,28 @@
                     });
 
                     if (allWorkers.length > 0) {
-                        initializeDashboard();
-                        loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                        if (isFirstLoad) {
+                            initializeDashboard();
+                            loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                        } else {
+                            applyFilters(); // Mantiene los filtros visualmente pero recarga la data
+                        }
                     } else {
                         alert("No se encontraron datos.");
-                        loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                        if (isFirstLoad) loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
                     }
+                    if (syncIcon) syncIcon.classList.remove('animate-spin');
                 })
                 .catch(error => {
-                    alert("Error al cargar la base de datos. Verifica tu conexión o el estado del Google Sheet.\nDetalle: " + error.message);
-                    loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    alert("Error al cargar la base de datos. Verifica tu conexión.\nDetalle: " + error.message);
+                    if (isFirstLoad) loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    if (syncIcon) syncIcon.classList.remove('animate-spin');
                 });
+        };
+
+        // LLAMADA INICIAL
+        document.addEventListener('DOMContentLoaded', () => {
+            syncData(true);
         });
 
         function getField(worker, ...keywords) {
@@ -516,7 +542,7 @@
                     actionHTML = `
                         <div class="flex items-center gap-2">
                             <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);">🏖️ VACACIONES</span>
-                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
+                            <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️️</button>
                         </div>
                     `;
                 } else {
