@@ -120,8 +120,8 @@
         <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
     </div>
 
-    <!-- Asegúrate de que el archivo de imagen se llame exactamente logo.png en tu GitHub (todo minúsculas) -->
-    <img src="logo.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
+    <!-- Se carga la imagen oculta con el nombre exacto proporcionado -->
+    <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
     <header>
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3">
@@ -345,7 +345,6 @@
 
                             let currentNombre = row[nameCol.index];
                             
-                            // DETERMINAR ESTADO (Pendiente, Entregado, Desvinculado, Licencia, Vacaciones)
                             let cellEstado = entregadoColInfo && row[entregadoColInfo.index] ? row[entregadoColInfo.index].toString().trim().toUpperCase() : '';
                             let estadoFinal = 'pendiente';
                             if (cellEstado === 'SI' || cellEstado === 'TRUE') estadoFinal = 'entregado';
@@ -521,7 +520,6 @@
                         </div>
                     `;
                 } else {
-                    // Estado Pendiente
                     actionHTML = `
                         <div class="flex items-center gap-2">
                             <button onclick="generarActaIndividual('${w.id}')" class="glass-btn-primary w-full text-center py-1.5 shadow-md">📄 Generar Acta</button>
@@ -543,7 +541,6 @@
             countRows.textContent = filteredWorkers.length;
         }
 
-        // MARCAR ESTADO ESPECIAL (LICENCIA, VACACIONES, DESVINCULADO)
         window.cambiarEstadoEspecial = function(id, nuevoEstado) {
             if(!nuevoEstado) return;
             const w = allWorkers.find(x => x.id === id);
@@ -560,16 +557,19 @@
             }
         };
 
-        // GENERAR ACTA INDIVIDUAL
+        // GENERAR ACTA INDIVIDUAL CON RUTA ABSOLUTA DE IMAGEN
         function generateWorkerPDF(worker, showCodigo) {
             const nombre = getField(worker, 'nombre'); const rut = getField(worker, 'rut');
             const parque = getField(worker, 'parque'); const area = getField(worker, 'area', 'área');
             const cargo = getField(worker, 'cargo'); const cc = getField(worker, 'centro', 'costo');
+            
+            // Extraer la URL resuelta de la imagen que ya cargó en el navegador
+            const logoSrc = document.getElementById('hiddenLogo').src;
 
             let printHTML = `
                 <div class="print-page">
                     <div class="p-header">
-                        <img src="logo.png" class="p-logo">
+                        <img src="${logoSrc}" class="p-logo">
                         <div class="p-title">ACTA DE RECEPCIÓN DE EQUIPO DE PROTECCIÓN<br>PERSONAL Y UNIFORME</div>
                     </div>
                     <div class="p-header-line"></div>
@@ -754,7 +754,7 @@
             XLSX.writeFile(wb, `Reporte_Entregas_${new Date().toISOString().split('T')[0]}.xlsx`);
         });
 
-        // IMPRIMIR RESUMEN PDF CON TALLAS
+        // IMPRIMIR RESUMEN PDF CON TALLAS Y URL ABSOLUTA DE IMAGEN
         document.getElementById('btnImprimirResumen').addEventListener('click', () => {
             if (filteredWorkers.length === 0) {
                 alert("No hay trabajadores en la vista actual para generar el resumen.");
@@ -816,11 +816,13 @@
             const aVal = filterArea.value || "Todas";
             const cVal = filterCargo.value || "Todos";
             const ccVal = filterCC.value || "Todos";
+            
+            const logoSrc = document.getElementById('hiddenLogo').src;
 
             let printHTML = `
                 <div class="print-page">
                     <div class="p-header">
-                        <img src="logo.png" class="p-logo">
+                        <img src="${logoSrc}" class="p-logo">
                         <div class="p-title" style="font-size: 15pt;">RESUMEN DE ROPA Y EPP<br><span style="font-size:10pt; font-weight:normal; color:#4b5563;">Listado Consolidado por Filtro</span></div>
                     </div>
                     <div class="p-header-line"></div>
