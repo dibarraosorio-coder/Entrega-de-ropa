@@ -557,12 +557,16 @@
             }
         };
 
-        // GENERAR ACTA INDIVIDUAL CON RUTA ABSOLUTA DE IMAGEN
+        // GENERAR ACTA INDIVIDUAL CON FECHA DINÁMICA Y RUTA ABSOLUTA DE IMAGEN
         function generateWorkerPDF(worker, showCodigo) {
             const nombre = getField(worker, 'nombre'); const rut = getField(worker, 'rut');
             const parque = getField(worker, 'parque'); const area = getField(worker, 'area', 'área');
             const cargo = getField(worker, 'cargo'); const cc = getField(worker, 'centro', 'costo');
             
+            // Obtener la fecha actual para la firma
+            const hoy = new Date();
+            const fechaActual = String(hoy.getDate()).padStart(2, '0') + ' / ' + String(hoy.getMonth() + 1).padStart(2, '0') + ' / ' + hoy.getFullYear();
+
             // Extraer la URL resuelta de la imagen que ya cargó en el navegador
             const logoSrc = document.getElementById('hiddenLogo').src;
 
@@ -638,7 +642,7 @@
                     <div class="p-decl-line"></div>
                     <div class="p-decl-text">Declaro recibir conforme los elementos arriba detallados para mi uso personal y obligatorio durante la jornada laboral.</div>
                     <div class="p-footer">
-                        <div class="p-sig-left"><div class="p-sig-label">FECHA DE ENTREGA</div><div class="p-date-text">_______ / _______ /<br>2027</div><div class="p-thick-line"></div></div>
+                        <div class="p-sig-left"><div class="p-sig-label">FECHA DE ENTREGA</div><div class="p-date-text" style="margin-top: 15px; margin-bottom: 10px; font-weight: bold; font-size: 13pt;">${fechaActual}</div><div class="p-thick-line"></div></div>
                         <div class="p-sig-right"><div class="p-sig-label">FIRMA DEL TRABAJADOR</div><div class="p-sig-box"></div><div class="p-sig-name-line">${nombre}</div></div>
                     </div>
                 </div>
