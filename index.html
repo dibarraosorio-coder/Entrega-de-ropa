@@ -109,19 +109,51 @@
         
         .sticky-filter { position: sticky; top: var(--sticky-top); z-index: 40; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
-        /* CLASES PARA ESTADOS DE BADGES (Colores Normales) */
+        /* CLASES PARA ESTADOS DE BADGES (Nivel 0: Normal Pastel) */
         .badge { padding: 4px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; transition: all 0.3s ease; }
         .badge-entregado { background: rgba(52, 211, 153, 0.1); color: #34d399; border-color: rgba(52, 211, 153, 0.4); }
         .badge-desvinculado { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
         .badge-licencia { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); }
         .badge-vacaciones { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.4); }
 
-        /* MODO DALTONISMO: Ajuste sutil a tonos pastel de alto contraste (Teal y Rose) */
-        body.colorblind-mode .badge-entregado { background: rgba(20, 184, 166, 0.15) !important; color: #0f766e !important; border-color: rgba(20, 184, 166, 0.5) !important; }
-        body.colorblind-mode .badge-desvinculado { background: rgba(244, 63, 94, 0.15) !important; color: #be123c !important; border-color: rgba(244, 63, 94, 0.5) !important; }
-        body.colorblind-mode .badge-licencia { background: rgba(217, 119, 6, 0.15) !important; color: #b45309 !important; border-color: rgba(217, 119, 6, 0.5) !important; }
-        body.colorblind-mode .badge-vacaciones { background: rgba(99, 102, 241, 0.15) !important; color: #4338ca !important; border-color: rgba(99, 102, 241, 0.5) !important; }
-        body.colorblind-mode .btn-daltonico { background: var(--accent-gold); color: #111; }
+        /* ========================================================= */
+        /* NIVEL 1: DALTONISMO (Colores Sólidos Universales)         */
+        /* ========================================================= */
+        body.contrast-1 .badge-entregado { background: #0055ff !important; color: #ffffff !important; border-color: #0033aa !important; }
+        body.contrast-1 .badge-desvinculado { background: #d90000 !important; color: #ffffff !important; border-color: #880000 !important; }
+        body.contrast-1 .badge-licencia { background: #ff8800 !important; color: #000000 !important; border-color: #cc6600 !important; }
+        body.contrast-1 .badge-vacaciones { background: #8800ff !important; color: #ffffff !important; border-color: #5500aa !important; }
+        body.contrast-1 { font-weight: 700; } /* Todo un poco más grueso para ayudar a la lectura */
+
+        /* ========================================================= */
+        /* NIVEL 2: ALTO CONTRASTE ABSOLUTO EN TODAS LAS PALETAS     */
+        /* ========================================================= */
+        body.contrast-2 { font-weight: 800; }
+        
+        /* Badges Nivel 2: Pantalla de Radar (Fondo Negro, Texto Neón Subrayado) */
+        body.contrast-2 .badge-entregado { background: #000000 !important; color: #00FF00 !important; border: 2px solid #00FF00 !important; font-weight: 900 !important; letter-spacing: 1px; text-decoration: underline; }
+        body.contrast-2 .badge-desvinculado { background: #000000 !important; color: #FF3333 !important; border: 2px solid #FF3333 !important; font-weight: 900 !important; letter-spacing: 1px; text-decoration: line-through; }
+        body.contrast-2 .badge-licencia { background: #000000 !important; color: #FFFF00 !important; border: 2px solid #FFFF00 !important; font-weight: 900 !important; letter-spacing: 1px; text-decoration: underline; }
+        body.contrast-2 .badge-vacaciones { background: #000000 !important; color: #00FFFF !important; border: 2px solid #00FFFF !important; font-weight: 900 !important; letter-spacing: 1px; text-decoration: underline; }
+
+        /* Sobreescribir las variables de los Temas para forzar contraste máximo */
+        body.contrast-2:not(.light-mode):not(.theme-gray):not(.theme-blue):not(.theme-pink):not(.theme-green) {
+            --text-main: #FFFFFF; --text-muted: #CCCCCC; --glass-border: #FFFFFF; --input-border: #FFFFFF; --accent-gold: #FFD700;
+        }
+        body.contrast-2.light-mode, body.contrast-2.theme-gray, body.contrast-2.theme-blue, body.contrast-2.theme-pink, body.contrast-2.theme-green {
+            --text-main: #000000; --text-muted: #222222; --glass-border: #000000; --input-border: #000000; --header-title: #000000; --accent-gold: #000000;
+        }
+
+        /* Estructuras en Nivel 2 */
+        body.contrast-2 .glass-panel { border: 2px solid var(--text-main) !important; background: var(--bg-body) !important; box-shadow: none !important;}
+        body.contrast-2 .glass-table th { background: var(--text-main) !important; color: var(--bg-body) !important; border-bottom: 3px solid var(--text-main) !important; }
+        body.contrast-2 .glass-table td { border-bottom: 1px solid var(--text-muted) !important; }
+        body.contrast-2 .glass-input, body.contrast-2 .glass-select { border: 2px solid var(--text-main) !important; background: transparent !important; }
+        body.contrast-2 .glass-btn, body.contrast-2 .top-action-btn { border: 2px solid var(--text-main) !important; font-weight: 900; background: transparent !important; color: var(--text-main) !important; }
+        body.contrast-2 .glass-btn:hover, body.contrast-2 .top-action-btn:hover { background: var(--text-main) !important; color: var(--bg-body) !important; }
+        body.contrast-2 .glass-btn-primary { border: 2px solid var(--text-main) !important; font-weight: 900; background: var(--text-main) !important; color: var(--bg-body) !important; }
+        /* ========================================================= */
+
 
         #print-area { display: none; }
         @media print {
@@ -164,15 +196,13 @@
         <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
     </div>
 
-    <!-- IMAGEN OCULTA -->
     <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
     <header id="mainHeader" class="relative p-6 sm:p-8 sm:pr-[240px] bg-[var(--header-bg)] border-b border-[var(--glass-border)] flex flex-col sm:flex-row items-center">
         
-        <!-- Botones absolutos arriba a la derecha -->
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-2 z-50">
-            <!-- Botón Modo Daltonismo -->
-            <button class="top-action-btn btn-daltonico" onclick="toggleColorblindMode()" title="Modo Accesibilidad (Corrección de colores para daltonismo)">
+            <!-- BOTÓN MODO DALTONISMO / CONTRASTE -->
+            <button id="btnContrast" class="top-action-btn" onclick="toggleContrastMode()" title="Ajustar Nivel de Accesibilidad Visual">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
 
@@ -191,10 +221,8 @@
             </button>
         </div>
         
-        <!-- LOGO A LA IZQUIERDA -->
         <img src="LOGO.png" alt="Logo de la Empresa" class="w-48 sm:w-60 mb-4 sm:mb-0 sm:mr-8" style="object-fit: contain;">
         
-        <!-- TÍTULOS Y SUBTÍTULOS CENTRADOS EN EL ESPACIO RESTANTE -->
         <div class="flex-1 flex flex-col items-center justify-center w-full">
             <div class="header-title text-center">ENTREGA DE UNIFORME Y EPP</div>
             <div class="header-subtitle text-center">Gestión de Entrega de Uniforme y EPP — Temporada Verano 2027</div>
@@ -205,7 +233,6 @@
         <div id="dashboard" class="hidden">
             <div class="flex flex-col xl:flex-row gap-6 mb-8 items-start">
                 
-                <!-- PANEL DE FILTROS (STICKY) -->
                 <div id="filterPanelWrapper" class="glass-panel w-full sticky-filter transition-all duration-300">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                         <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider">Filtros & Búsqueda</h2>
@@ -294,7 +321,6 @@
     <div id="print-area"></div>
 
     <script>
-        // Lógica de cálculo dinámico para el top del sticky
         function updateStickyPosition() {
             const header = document.getElementById('mainHeader');
             if(header) {
@@ -323,18 +349,34 @@
         if (currentThemeIndex === -1) currentThemeIndex = 0;
         applyThemeClass(savedTheme);
 
-        // CONFIGURACIÓN DE ACCESIBILIDAD (DALTONISMO)
-        let isColorblind = localStorage.getItem('colorblindMode') === 'true';
-        function applyColorblindMode() {
-            if(isColorblind) document.body.classList.add('colorblind-mode');
-            else document.body.classList.remove('colorblind-mode');
+        // CONFIGURACIÓN NIVELES DE CONTRASTE (DALTONISMO Y EXTREMO)
+        let contrastLevel = parseInt(localStorage.getItem('contrastLevel')) || 0;
+        function applyContrastMode() {
+            document.body.classList.remove('contrast-1', 'contrast-2');
+            const btn = document.getElementById('btnContrast');
+            
+            if(contrastLevel === 1) {
+                document.body.classList.add('contrast-1');
+                btn.style.color = '#ffffff';
+                btn.style.background = '#0055ff'; // Azul para el nivel 1
+                btn.style.borderColor = '#0055ff';
+            } else if(contrastLevel === 2) {
+                document.body.classList.add('contrast-2');
+                btn.style.color = '#00FF00'; // Neón
+                btn.style.background = '#000000'; // Negro absoluto
+                btn.style.borderColor = '#00FF00';
+            } else {
+                btn.style.color = '';
+                btn.style.background = '';
+                btn.style.borderColor = '';
+            }
         }
-        window.toggleColorblindMode = function() {
-            isColorblind = !isColorblind;
-            localStorage.setItem('colorblindMode', isColorblind);
-            applyColorblindMode();
+        window.toggleContrastMode = function() {
+            contrastLevel = (contrastLevel + 1) % 3; // Cicla entre 0, 1 y 2
+            localStorage.setItem('contrastLevel', contrastLevel);
+            applyContrastMode();
         };
-        applyColorblindMode(); 
+        applyContrastMode(); 
 
         const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHHShfOu3YUX4youw2hhKO9B2dPiCuKVORmZz5ppoPvd8qjpQ0JRQPxol6RTMGNTLgQA/exec";
 
@@ -880,7 +922,7 @@
             XLSX.writeFile(wb, `Reporte_Gestion_${new Date().toISOString().split('T')[0]}.xlsx`);
         });
 
-        // NÓMINA DE TRABAJADORES EN PDF CON FIRMA DE JEFATURA Y SOPORTE DALTONISMO
+        // NÓMINA DE TRABAJADORES EN PDF CON FIRMA DE JEFATURA
         document.getElementById('btnImprimirResumen').addEventListener('click', () => {
             if (filteredWorkers.length === 0) {
                 alert("No hay trabajadores en la vista actual para generar la nómina.");
@@ -928,11 +970,12 @@
             filteredWorkers.forEach((w, index) => {
                 let estadoColor = "#000";
                 
-                if(isColorblind) {
-                    if(w.estado === "entregado") estadoColor = "#0f766e"; // Teal
-                    if(w.estado === "desvinculado") estadoColor = "#be123c"; // Rose
-                    if(w.estado === "licencia") estadoColor = "#b45309"; // Amber
-                    if(w.estado === "vacaciones") estadoColor = "#4338ca"; // Indigo
+                // Si el nivel 1 o 2 de contraste están activos, imprime los colores fuertes.
+                if(contrastLevel > 0) {
+                    if(w.estado === "entregado") estadoColor = "#0055ff"; // Azul sólido
+                    if(w.estado === "desvinculado") estadoColor = "#d90000"; // Rojo sólido
+                    if(w.estado === "licencia") estadoColor = "#b45309"; // Naranja oscuro
+                    if(w.estado === "vacaciones") estadoColor = "#440088"; // Morado sólido
                 } else {
                     if(w.estado === "entregado") estadoColor = "#059669";
                     if(w.estado === "desvinculado") estadoColor = "#DC2626";
