@@ -19,7 +19,7 @@
             --card-bg: #121E18; --input-bg: rgba(26,44,35,0.8); --input-border: rgba(229,222,206,0.1);
             --btn-bg: rgba(26,44,35,0.8); --btn-hover: rgba(229,222,206,0.1);
             --accent-gold: #B39266; --neon-red: #8B3A3A; --radius: 12px;
-            var(--sticky-top): 0px;
+            --sticky-top: 0px;
         }
         body.light-mode {
             --bg-body: #fdfbf7; --bg-gradient: linear-gradient(145deg, #fdfbf7 0%, #EAE2D2 100%);
@@ -59,10 +59,30 @@
 
         body { font-family: 'Nunito', sans-serif; background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
         
+        header { 
+            position: relative; 
+            padding: 30px 24px; 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--glass-border); 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        @media (min-width: 640px) {
+            header {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: flex-start;
+                text-align: left;
+                padding-right: 220px; 
+            }
+        }
+
         .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 700; color: var(--header-title); text-transform: uppercase; letter-spacing: .08em; line-height: 1.2;}
         .header-subtitle { font-family: 'Cinzel', serif; font-size: .75rem; color: var(--accent-gold); margin-top: 8px; letter-spacing: .20em; text-transform: uppercase; font-weight: 700; }
 
-        .top-action-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--accent-gold); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; }
+        .top-action-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--accent-gold); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; }
         .top-action-btn:hover { background: var(--btn-hover); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
         .glass-panel { background: var(--card-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); border-radius: var(--radius); padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: all 0.3s ease; }
@@ -87,12 +107,21 @@
 
         #loadingOverlay { position: fixed; inset: 0; background: var(--bg-gradient); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
         
-        .sticky-filter {
-            position: sticky;
-            top: var(--sticky-top);
-            z-index: 40;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
+        .sticky-filter { position: sticky; top: var(--sticky-top); z-index: 40; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+        /* CLASES PARA ESTADOS DE BADGES */
+        .badge { padding: 4px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+        .badge-entregado { background: rgba(52, 211, 153, 0.1); color: #34d399; border-color: rgba(52, 211, 153, 0.4); }
+        .badge-desvinculado { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
+        .badge-licencia { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); }
+        .badge-vacaciones { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.4); }
+
+        /* MODO DALTONISMO: Sobrescribe los colores pastel por colores primarios sólidos y contrastados */
+        body.colorblind-mode .badge-entregado { background: #0055ff !important; color: #ffffff !important; border-color: #0033aa !important; }
+        body.colorblind-mode .badge-desvinculado { background: #000000 !important; color: #ffffff !important; border-color: #333333 !important; }
+        body.colorblind-mode .badge-licencia { background: #ff8800 !important; color: #000000 !important; border-color: #cc6600 !important; }
+        body.colorblind-mode .badge-vacaciones { background: #8800ff !important; color: #ffffff !important; border-color: #5500aa !important; }
+        body.colorblind-mode .btn-daltonico { background: var(--accent-gold); color: #111; }
 
         #print-area { display: none; }
         @media print {
@@ -135,21 +164,26 @@
         <h2 class="text-xl font-bold tracking-widest text-[var(--accent-gold)] uppercase" style="font-family: 'Cinzel', serif;">Sincronizando Sistema...</h2>
     </div>
 
-    <!-- IMAGEN OCULTA (Usada para inyectar en el PDF) -->
+    <!-- IMAGEN OCULTA -->
     <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
     <header id="mainHeader" class="relative p-6 sm:p-8 sm:pr-[240px] bg-[var(--header-bg)] border-b border-[var(--glass-border)] flex flex-col sm:flex-row items-center">
         
         <!-- Botones absolutos arriba a la derecha -->
-        <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3 z-50">
+        <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-2 z-50">
+            <!-- NUEVO: Botón Modo Daltonismo -->
+            <button class="top-action-btn btn-daltonico" onclick="toggleColorblindMode()" title="Modo Accesibilidad (Mejora visibilidad de colores)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+
             <button class="top-action-btn" onclick="syncData(false)" title="Actualizar datos con el Excel sin perder filtros">
-                <svg id="syncIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                <span class="hidden sm:inline">Actualizar</span>
+                <svg id="syncIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 sm:mr-1"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                <span class="hidden lg:inline">Actualizar</span>
             </button>
             
             <a href="https://docs.google.com/spreadsheets/d/1UUf-CxKwgrgF0Y8c5WASdje2Fi1rEOT1lK__gY8DXlk/edit?gid=0#gid=0" target="_blank" class="top-action-btn" title="Ir a Planilla Excel">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 hidden sm:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Excel
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 sm:mr-1 hidden sm:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span class="hidden lg:inline">Excel</span>
             </a>
             
             <button class="top-action-btn" onclick="toggleTheme()" title="Cambiar Tema de Color">
@@ -171,7 +205,7 @@
         <div id="dashboard" class="hidden">
             <div class="flex flex-col xl:flex-row gap-6 mb-8 items-start">
                 
-                <!-- PANEL DE FILTROS (STICKY AL HACER SCROLL) -->
+                <!-- PANEL DE FILTROS (STICKY) -->
                 <div id="filterPanelWrapper" class="glass-panel w-full sticky-filter transition-all duration-300">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                         <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider">Filtros & Búsqueda</h2>
@@ -215,7 +249,7 @@
                     </div>
                 </div>
 
-                <!-- PANEL DE REPORTES (TAMBIÉN STICKY) -->
+                <!-- PANEL DE REPORTES -->
                 <div id="reportPanel" class="glass-panel flex flex-col justify-center gap-4 hidden shrink-0 xl:w-72 sticky-filter transition-all duration-300">
                     <h2 class="text-lg font-bold text-[var(--accent-gold)] uppercase tracking-wider text-center">Exportación</h2>
                     
@@ -288,6 +322,19 @@
         currentThemeIndex = themes.indexOf(savedTheme);
         if (currentThemeIndex === -1) currentThemeIndex = 0;
         applyThemeClass(savedTheme);
+
+        // CONFIGURACIÓN DE DALTONISMO
+        let isColorblind = localStorage.getItem('colorblindMode') === 'true';
+        function applyColorblindMode() {
+            if(isColorblind) document.body.classList.add('colorblind-mode');
+            else document.body.classList.remove('colorblind-mode');
+        }
+        window.toggleColorblindMode = function() {
+            isColorblind = !isColorblind;
+            localStorage.setItem('colorblindMode', isColorblind);
+            applyColorblindMode();
+        };
+        applyColorblindMode(); // Ejecutar al cargar
 
         const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHHShfOu3YUX4youw2hhKO9B2dPiCuKVORmZz5ppoPvd8qjpQ0JRQPxol6RTMGNTLgQA/exec";
 
@@ -424,7 +471,7 @@
                     if (allWorkers.length > 0) {
                         if (isFirstLoad) {
                             initializeDashboard();
-                            updateStickyPosition();
+                            setTimeout(updateStickyPosition, 100);
                             loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
                         } else {
                             applyFilters(); 
@@ -549,7 +596,7 @@
                 if(w.estado === 'entregado') {
                     actionHTML = `
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4);">✓ ENTREGADO</span>
+                            <span class="badge badge-entregado">✓ ENTREGADO</span>
                             <button onclick="generarActaIndividual('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Reimprimir Acta">🖨️</button>
                             <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-red-500 hover:border-red-500" title="Deshacer Entrega" style="color: #ef4444;">↩️</button>
                         </div>
@@ -557,21 +604,21 @@
                 } else if (w.estado === 'desvinculado') {
                     actionHTML = `
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);">🚫 DESVINCULADO</span>
+                            <span class="badge badge-desvinculado">🚫 DESVINCULADO</span>
                             <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
                         </div>
                     `;
                 } else if (w.estado === 'licencia') {
                     actionHTML = `
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">⚕️ LICENCIA</span>
+                            <span class="badge badge-licencia">⚕️ LICENCIA</span>
                             <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
                         </div>
                     `;
                 } else if (w.estado === 'vacaciones') {
                     actionHTML = `
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 text-xs font-bold rounded" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);">🏖️ VACACIONES</span>
+                            <span class="badge badge-vacaciones">🏖️ VACACIONES</span>
                             <button onclick="deshacerEntrega('${w.id}')" class="glass-btn py-1 px-2 text-[0.7rem] hover:text-[var(--accent-gold)]" title="Deshacer Cambio">↩️</button>
                         </div>
                     `;
@@ -743,7 +790,6 @@
 
             const wb = XLSX.utils.book_new();
             
-            // HOJA 1: DETALLE GENERAL (Todos los gestionados)
             const exportData = workersToExport.map(w => {
                 let estadoFormat = w.estado.toUpperCase();
                 if (estadoFormat === 'ENTREGADO') estadoFormat = 'SI';
@@ -756,7 +802,6 @@
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportData), "Detalle_General");
 
-            // HOJA 2: RESUMEN DE ENTREGAS (Solo suma los entregados)
             const totals = {};
             const entregados = allWorkers.filter(w => w.estado === 'entregado');
             entregados.forEach(w => {
@@ -815,7 +860,6 @@
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(totalsData), "Resumen_Entregas");
 
-            // HOJA 3: REPORTE DE AUSENTISMOS Y DESVINCULADOS
             const ausentes = allWorkers.filter(w => ['desvinculado', 'licencia', 'vacaciones'].includes(w.estado));
             const ausentesData = ausentes.map(w => ({
                 "RUT": getField(w, 'rut'),
@@ -883,10 +927,20 @@
 
             filteredWorkers.forEach((w, index) => {
                 let estadoColor = "#000";
-                if(w.estado === "entregado") estadoColor = "#059669";
-                if(w.estado === "desvinculado") estadoColor = "#DC2626";
-                if(w.estado === "licencia") estadoColor = "#D97706";
-                if(w.estado === "vacaciones") estadoColor = "#2563EB";
+                
+                // Si el daltonismo está activo, imprime en colores sólidos de alto contraste.
+                // Si no, imprime en los colores originales (verde, rojo, etc.)
+                if(isColorblind) {
+                    if(w.estado === "entregado") estadoColor = "#0055ff";
+                    if(w.estado === "desvinculado") estadoColor = "#000000";
+                    if(w.estado === "licencia") estadoColor = "#ff8800";
+                    if(w.estado === "vacaciones") estadoColor = "#8800ff";
+                } else {
+                    if(w.estado === "entregado") estadoColor = "#059669";
+                    if(w.estado === "desvinculado") estadoColor = "#DC2626";
+                    if(w.estado === "licencia") estadoColor = "#D97706";
+                    if(w.estado === "vacaciones") estadoColor = "#2563EB";
+                }
 
                 printHTML += `
                     <tr style="page-break-inside: avoid;">
