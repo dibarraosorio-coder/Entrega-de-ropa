@@ -109,18 +109,18 @@
         
         .sticky-filter { position: sticky; top: var(--sticky-top); z-index: 40; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
-        /* CLASES PARA ESTADOS DE BADGES */
-        .badge { padding: 4px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+        /* CLASES PARA ESTADOS DE BADGES (Colores Normales) */
+        .badge { padding: 4px 8px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; transition: all 0.3s ease; }
         .badge-entregado { background: rgba(52, 211, 153, 0.1); color: #34d399; border-color: rgba(52, 211, 153, 0.4); }
         .badge-desvinculado { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
         .badge-licencia { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); }
         .badge-vacaciones { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.4); }
 
-        /* MODO DALTONISMO: Sobrescribe los colores pastel por colores primarios sólidos y contrastados */
-        body.colorblind-mode .badge-entregado { background: #0055ff !important; color: #ffffff !important; border-color: #0033aa !important; }
-        body.colorblind-mode .badge-desvinculado { background: #000000 !important; color: #ffffff !important; border-color: #333333 !important; }
-        body.colorblind-mode .badge-licencia { background: #ff8800 !important; color: #000000 !important; border-color: #cc6600 !important; }
-        body.colorblind-mode .badge-vacaciones { background: #8800ff !important; color: #ffffff !important; border-color: #5500aa !important; }
+        /* MODO DALTONISMO: Ajuste sutil a tonos pastel de alto contraste (Teal y Rose) */
+        body.colorblind-mode .badge-entregado { background: rgba(20, 184, 166, 0.15) !important; color: #0f766e !important; border-color: rgba(20, 184, 166, 0.5) !important; }
+        body.colorblind-mode .badge-desvinculado { background: rgba(244, 63, 94, 0.15) !important; color: #be123c !important; border-color: rgba(244, 63, 94, 0.5) !important; }
+        body.colorblind-mode .badge-licencia { background: rgba(217, 119, 6, 0.15) !important; color: #b45309 !important; border-color: rgba(217, 119, 6, 0.5) !important; }
+        body.colorblind-mode .badge-vacaciones { background: rgba(99, 102, 241, 0.15) !important; color: #4338ca !important; border-color: rgba(99, 102, 241, 0.5) !important; }
         body.colorblind-mode .btn-daltonico { background: var(--accent-gold); color: #111; }
 
         #print-area { display: none; }
@@ -171,8 +171,8 @@
         
         <!-- Botones absolutos arriba a la derecha -->
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-2 z-50">
-            <!-- NUEVO: Botón Modo Daltonismo -->
-            <button class="top-action-btn btn-daltonico" onclick="toggleColorblindMode()" title="Modo Accesibilidad (Mejora visibilidad de colores)">
+            <!-- Botón Modo Daltonismo -->
+            <button class="top-action-btn btn-daltonico" onclick="toggleColorblindMode()" title="Modo Accesibilidad (Corrección de colores para daltonismo)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
 
@@ -323,7 +323,7 @@
         if (currentThemeIndex === -1) currentThemeIndex = 0;
         applyThemeClass(savedTheme);
 
-        // CONFIGURACIÓN DE DALTONISMO
+        // CONFIGURACIÓN DE ACCESIBILIDAD (DALTONISMO)
         let isColorblind = localStorage.getItem('colorblindMode') === 'true';
         function applyColorblindMode() {
             if(isColorblind) document.body.classList.add('colorblind-mode');
@@ -334,7 +334,7 @@
             localStorage.setItem('colorblindMode', isColorblind);
             applyColorblindMode();
         };
-        applyColorblindMode(); // Ejecutar al cargar
+        applyColorblindMode(); 
 
         const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzHHShfOu3YUX4youw2hhKO9B2dPiCuKVORmZz5ppoPvd8qjpQ0JRQPxol6RTMGNTLgQA/exec";
 
@@ -880,7 +880,7 @@
             XLSX.writeFile(wb, `Reporte_Gestion_${new Date().toISOString().split('T')[0]}.xlsx`);
         });
 
-        // NÓMINA DE TRABAJADORES EN PDF CON FIRMA DE JEFATURA
+        // NÓMINA DE TRABAJADORES EN PDF CON FIRMA DE JEFATURA Y SOPORTE DALTONISMO
         document.getElementById('btnImprimirResumen').addEventListener('click', () => {
             if (filteredWorkers.length === 0) {
                 alert("No hay trabajadores en la vista actual para generar la nómina.");
@@ -928,13 +928,11 @@
             filteredWorkers.forEach((w, index) => {
                 let estadoColor = "#000";
                 
-                // Si el daltonismo está activo, imprime en colores sólidos de alto contraste.
-                // Si no, imprime en los colores originales (verde, rojo, etc.)
                 if(isColorblind) {
-                    if(w.estado === "entregado") estadoColor = "#0055ff";
-                    if(w.estado === "desvinculado") estadoColor = "#000000";
-                    if(w.estado === "licencia") estadoColor = "#ff8800";
-                    if(w.estado === "vacaciones") estadoColor = "#8800ff";
+                    if(w.estado === "entregado") estadoColor = "#0f766e"; // Teal
+                    if(w.estado === "desvinculado") estadoColor = "#be123c"; // Rose
+                    if(w.estado === "licencia") estadoColor = "#b45309"; // Amber
+                    if(w.estado === "vacaciones") estadoColor = "#4338ca"; // Indigo
                 } else {
                     if(w.estado === "entregado") estadoColor = "#059669";
                     if(w.estado === "desvinculado") estadoColor = "#DC2626";
