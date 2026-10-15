@@ -19,6 +19,7 @@
             --card-bg: #121E18; --input-bg: rgba(26,44,35,0.8); --input-border: rgba(229,222,206,0.1);
             --btn-bg: rgba(26,44,35,0.8); --btn-hover: rgba(229,222,206,0.1);
             --accent-gold: #B39266; --neon-red: #8B3A3A; --radius: 12px;
+            var(--sticky-top): 0px;
         }
         body.light-mode {
             --bg-body: #fdfbf7; --bg-gradient: linear-gradient(145deg, #fdfbf7 0%, #EAE2D2 100%);
@@ -58,27 +59,6 @@
 
         body { font-family: 'Nunito', sans-serif; background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
         
-        /* NUEVA ESTRUCTURA DEL HEADER */
-        header { 
-            position: relative; 
-            padding: 30px 24px; 
-            background: var(--header-bg); 
-            border-bottom: 1px solid var(--glass-border); 
-            display: flex; 
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        @media (min-width: 640px) {
-            header {
-                flex-direction: row;
-                align-items: flex-start;
-                justify-content: flex-start;
-                text-align: left;
-                padding-right: 180px; /* Evita que el texto pise los botones absolutos */
-            }
-        }
-
         .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 700; color: var(--header-title); text-transform: uppercase; letter-spacing: .08em; line-height: 1.2;}
         .header-subtitle { font-family: 'Cinzel', serif; font-size: .75rem; color: var(--accent-gold); margin-top: 8px; letter-spacing: .20em; text-transform: uppercase; font-weight: 700; }
 
@@ -109,7 +89,7 @@
         
         .sticky-filter {
             position: sticky;
-            top: 10px;
+            top: var(--sticky-top);
             z-index: 40;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
@@ -156,10 +136,11 @@
     </div>
 
     <!-- IMAGEN OCULTA (Usada para inyectar en el PDF) -->
-    <!-- Se mantiene el nombre LOGO.png para asegurar compatibilidad en GitHub -->
     <img src="LOGO.png" id="hiddenLogo" style="display:none;" alt="Cache Logo">
 
-    <header id="mainHeader">
+    <header id="mainHeader" class="relative p-6 sm:p-8 sm:pr-[240px] bg-[var(--header-bg)] border-b border-[var(--glass-border)] flex flex-col sm:flex-row items-center">
+        
+        <!-- Botones absolutos arriba a la derecha -->
         <div class="absolute top-4 right-4 sm:top-6 sm:right-8 flex gap-3 z-50">
             <button class="top-action-btn" onclick="syncData(false)" title="Actualizar datos con el Excel sin perder filtros">
                 <svg id="syncIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -179,10 +160,10 @@
         <!-- LOGO A LA IZQUIERDA -->
         <img src="LOGO.png" alt="Logo de la Empresa" class="w-48 sm:w-60 mb-4 sm:mb-0 sm:mr-8" style="object-fit: contain;">
         
-        <!-- TÍTULOS Y SUBTÍTULOS -->
-        <div class="flex flex-col">
-            <div class="header-title">ENTREGA DE UNIFORME Y EPP</div>
-            <div class="header-subtitle">Gestión de Entrega de Uniforme y EPP — Temporada Verano 2027</div>
+        <!-- TÍTULOS Y SUBTÍTULOS CENTRADOS EN EL ESPACIO RESTANTE -->
+        <div class="flex-1 flex flex-col items-center justify-center w-full">
+            <div class="header-title text-center">ENTREGA DE UNIFORME Y EPP</div>
+            <div class="header-subtitle text-center">Gestión de Entrega de Uniforme y EPP — Temporada Verano 2027</div>
         </div>
     </header>
 
@@ -250,7 +231,7 @@
 
                     <button id="btnImprimirResumen" class="glass-btn flex items-center justify-center gap-2 hover:text-blue-500 hover:border-blue-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Resumen Filtrado PDF
+                        Nómina Filtrada PDF
                     </button>
                 </div>
             </div>
@@ -279,6 +260,16 @@
     <div id="print-area"></div>
 
     <script>
+        // Lógica de cálculo dinámico para el top del sticky
+        function updateStickyPosition() {
+            const header = document.getElementById('mainHeader');
+            if(header) {
+                const headerHeight = header.offsetHeight;
+                document.documentElement.style.setProperty('--sticky-top', `${headerHeight + 20}px`);
+            }
+        }
+        window.addEventListener('resize', updateStickyPosition);
+
         // CONFIGURACIÓN TEMA
         const themes = ['dark', 'light', 'theme-gray', 'theme-blue', 'theme-pink', 'theme-green'];
         let currentThemeIndex = 0;
@@ -433,6 +424,7 @@
                     if (allWorkers.length > 0) {
                         if (isFirstLoad) {
                             initializeDashboard();
+                            updateStickyPosition();
                             loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
                         } else {
                             applyFilters(); 
@@ -844,62 +836,12 @@
             XLSX.writeFile(wb, `Reporte_Gestion_${new Date().toISOString().split('T')[0]}.xlsx`);
         });
 
-        // IMPRIMIR RESUMEN PDF CON TALLAS Y URL ABSOLUTA DE IMAGEN
+        // NÓMINA DE TRABAJADORES EN PDF CON FIRMA DE JEFATURA
         document.getElementById('btnImprimirResumen').addEventListener('click', () => {
             if (filteredWorkers.length === 0) {
-                alert("No hay trabajadores en la vista actual para generar el resumen.");
+                alert("No hay trabajadores en la vista actual para generar la nómina.");
                 return;
             }
-
-            const totals = {};
-            filteredWorkers.forEach(w => {
-                w.epps.forEach((epp, index) => {
-                    let detalle = epp.detail;
-                    if(detalle && (detalle.toString().toUpperCase() === 'X' || detalle.toString() === '1' || detalle.toString().toUpperCase() === 'SI')) detalle = ''; 
-
-                    let displayNames = [epp.name];
-                    let upName = epp.name.toUpperCase();
-                    
-                    if (upName === 'TALLA BOTÍN' || upName === 'TALLA BOTIN') {
-                        const modeloBotin = getField(w, 'modelo botín', 'modelo botin');
-                        if (modeloBotin) {
-                            displayNames = modeloBotin.toString().split(/\s*\/\s*|\s+y\s+/i).map(s => s.trim()).filter(s => s);
-                        } else {
-                            displayNames = ['BOTÍN'];
-                        }
-                    }
-
-                    if (w.sheet.trim().toUpperCase() === 'PV2' && index === 1) {
-                        let valColH = w.rawRow[7];
-                        let valColJ = w.rawRow[9];
-                        if (valColJ !== undefined && valColJ.toString().trim() !== '') {
-                            displayNames = [valColJ.toString().toUpperCase()];
-                        }
-                        if (valColH !== undefined) {
-                            detalle = valColH.toString().toUpperCase();
-                        } else {
-                            detalle = '';
-                        }
-                    }
-
-                    let cleanSize = detalle ? detalle.toString().trim().toUpperCase() : "";
-
-                    displayNames.forEach(dName => {
-                        let itemName = dName.toUpperCase();
-                        let key = itemName + "|||" + cleanSize;
-                        
-                        if(!totals[key]) {
-                            totals[key] = { name: itemName, size: cleanSize, qty: 0 };
-                        }
-                        totals[key].qty += epp.qty;
-                    });
-                });
-            });
-
-            const sortedKeys = Object.keys(totals).sort((a, b) => {
-                if(totals[a].name === totals[b].name) return totals[a].size.localeCompare(totals[b].size);
-                return totals[a].name.localeCompare(totals[b].name);
-            });
 
             const stVal = filterStatus.options[filterStatus.selectedIndex].text;
             const pVal = filterParque.value || "Todos";
@@ -913,11 +855,11 @@
                 <div class="print-page">
                     <div class="p-header">
                         <img src="${logoSrc}" class="p-logo">
-                        <div class="p-title" style="font-size: 15pt;">RESUMEN DE ROPA Y EPP<br><span style="font-size:10pt; font-weight:normal; color:#4b5563;">Listado Consolidado por Filtro</span></div>
+                        <div class="p-title" style="font-size: 14pt;">REPORTE DE TRABAJADORES<br><span style="font-size:9pt; font-weight:normal; color:#4b5563;">Listado según Área y Estado de Entrega</span></div>
                     </div>
                     <div class="p-header-line"></div>
 
-                    <div class="p-info-box" style="margin-bottom: 25px;">
+                    <div class="p-info-box" style="margin-bottom: 20px;">
                         <div class="p-info-row"><div class="p-info-label">ESTADO MOSTRADO</div><div class="p-info-value">${stVal}</div></div>
                         <div class="p-info-row"><div class="p-info-label">PARQUE</div><div class="p-info-value">${pVal}</div></div>
                         <div class="p-info-row"><div class="p-info-label">ÁREA</div><div class="p-info-value">${aVal}</div></div>
@@ -926,36 +868,49 @@
                         <div class="p-info-row"><div class="p-info-label">TRABAJADORES</div><div class="p-info-value">${filteredWorkers.length}</div></div>
                     </div>
 
-                    <table class="p-table">
+                    <table class="p-table" style="font-size: 8pt;">
                         <thead>
                             <tr>
-                                <th style="width: 60%; text-align: left;">ELEMENTO / ÍTEM</th>
-                                <th style="width: 20%; text-align: center;">TALLA</th>
-                                <th style="width: 20%; text-align: center;">CANTIDAD TOTAL</th>
+                                <th style="width: 5%; text-align: center;">N°</th>
+                                <th style="width: 15%; text-align: left;">RUT</th>
+                                <th style="width: 35%; text-align: left;">NOMBRE</th>
+                                <th style="width: 30%; text-align: left;">CARGO</th>
+                                <th style="width: 15%; text-align: center;">ESTADO</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
 
-            if (sortedKeys.length === 0) {
-                printHTML += `<tr><td colspan="3" style="text-align:center; padding: 20px;">No hay ítems registrados en esta vista</td></tr>`;
-            } else {
-                sortedKeys.forEach(key => {
-                    const item = totals[key];
-                    printHTML += `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td style="text-align:center;">${item.size || '-'}</td>
-                            <td style="text-align:center;">${item.qty}</td>
-                        </tr>
-                    `;
-                });
-            }
+            filteredWorkers.forEach((w, index) => {
+                let estadoColor = "#000";
+                if(w.estado === "entregado") estadoColor = "#059669";
+                if(w.estado === "desvinculado") estadoColor = "#DC2626";
+                if(w.estado === "licencia") estadoColor = "#D97706";
+                if(w.estado === "vacaciones") estadoColor = "#2563EB";
+
+                printHTML += `
+                    <tr style="page-break-inside: avoid;">
+                        <td style="text-align: center;">${index + 1}</td>
+                        <td>${getField(w, 'rut')}</td>
+                        <td>${getField(w, 'nombre')}</td>
+                        <td>${getField(w, 'cargo')}</td>
+                        <td style="text-align: center; font-weight: bold; color: ${estadoColor};">${w.estado.toUpperCase()}</td>
+                    </tr>
+                `;
+            });
 
             printHTML += `
                         </tbody>
                     </table>
-                    <div class="p-table-bottom-line" style="margin-top: 15px;"></div>
+                    
+                    <div style="margin-top: 60px; display: flex; justify-content: center; page-break-inside: avoid;">
+                        <div style="text-align: center; width: 300px;">
+                            <div style="border-top: 2px solid #000; padding-top: 5px; font-weight: bold; font-size: 9pt;">FIRMA SUPERVISOR / JEFATURA</div>
+                            <div style="font-size: 8pt; color: #4b5563; margin-top: 2px;">ÁREA: ${aVal.toUpperCase()}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-table-bottom-line" style="margin-top: 30px;"></div>
                     <div class="p-decl-text" style="text-align: left;">Documento generado el ${new Date().toLocaleDateString('es-CL')} a las ${new Date().toLocaleTimeString('es-CL')}</div>
                 </div>
             `;
