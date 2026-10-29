@@ -1,6 +1,7 @@
 # 👕 Sistema de Gestión de Entrega de Uniforme y EPP
 
-*(Coloca aquí una captura de pantalla de la aplicación, mostrando el logotipo superior izquierdo, el título "ENTREGA DE UNIFORME Y EPP" y el panel de filtros)*.
+<img width="1889" height="487" alt="image" src="https://github.com/user-attachments/assets/a2a555a8-2c16-49c2-abab-586ad37a2abd" />
+
 
 **Plataforma web colaborativa y en tiempo real para la digitalización, control y trazabilidad de entregas masivas de indumentaria corporativa (Ej. Temporada Verano 2027).**
 
